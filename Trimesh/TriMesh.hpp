@@ -111,6 +111,8 @@ class Mesh2D {
         Matrix<int> elems; // elements of mesh
         Matrix<int> sibhfs; // sibling half-faces
         std::vector<bool> elems_on_boundary; // boolean array of elements on boundary
+        std::vector<bool> nodes_on_boundary; // boolean array of nodes on boundary
+        std::vector<double> quality; // quality of elements
 
         /**
          * @brief Construct a new Mesh 2D object with default size 0,0
@@ -157,6 +159,26 @@ class Mesh2D {
          * @param segments segment array
          */
         void Triangulate(Matrix<double> &coords, Matrix<int> &segments);
+
+        /**
+         * @brief Refine mesh based on edge length
+         * 
+         * @param h_target target edge length
+         */
+        void Refine(double h_target);
+        
+        /**
+         * @brief Smooth mesh with max number of iterations
+         * 
+         * @param niters 
+         */
+        void Smooth(int niters);
+
+        /**
+         * @brief compute volume length metric of the mesh
+         * 
+         */
+        void Compute_volume_length_metric();
 
         /**
          * @brief print contents of the mesh

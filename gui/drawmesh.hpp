@@ -20,6 +20,7 @@ public:
 
     // drawing mesh
     void showMesh();
+    void showQuality();
 
     bool isModified() const { return modified; }
     QColor penColor() const { return myPenColor; }
@@ -30,6 +31,8 @@ public:
     Matrix<double> coords;
     Matrix<int> segments;
     Mesh2D mesh;
+    double h_target = 0.01;
+    int max_smoothing_iters = 100;
 
 public slots:
     void clearImage();
@@ -53,6 +56,8 @@ private:
     QImage image;
     QPoint lastPoint;
     QPoint firstPoint;
+    int firstPointIndex = -1;
+    bool firstpointinit = false;
 };
 
 #endif

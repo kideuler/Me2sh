@@ -188,7 +188,7 @@ void GeoMesh_DelaunayRefine(struct Mesh *msh, bool use_edgelengh, double h_targe
                     }
 
                     if (!stop){
-                        Mesh_Bowyer_Watson_insertion(msh,&nv,tri);
+                        Mesh_flip_insertion(msh,&nv,tri);
                     }
                 }
                 nv++;
@@ -219,7 +219,7 @@ void GeoMesh_DelaunayRefine(struct Mesh *msh, bool use_edgelengh, double h_targe
 // Constrained Delaunay triangulation driver function
 struct Mesh GeoMesh_ConstrainedDelaunay(struct IntMatrix *segments, struct DoubleMatrix *xs){
     struct Mesh msh = GeoMesh_Delaunay(xs,1);
-    int maxne=20;
+    int maxne=100;
     Mesh_compute_OneringElements(&msh,maxne);
     maxne = msh.stncl.maxne;
 
@@ -304,7 +304,7 @@ struct Mesh GeoMesh_ConstrainedDelaunay(struct IntMatrix *segments, struct Doubl
                         eid = oppeid;
                         lid = (opplid+2)%3;
                     } else {
-                        printf("no line crossings found\n");
+                        //printf("no line crossings found\n");
                     }
                 }
                 flip_edge(&msh, eid, lid);

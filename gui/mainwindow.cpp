@@ -63,6 +63,51 @@ void MainWindow::about()
                "to repaint widgets.</p>"));
 }
 
+void MainWindow::sethtarget(){
+    bool ok;
+    double h_target = QInputDialog::getDouble(this, tr("DrawMesh"),
+                                        tr("Select target h value:"),
+                                        drawMeshArea->h_target,
+                                        0, 1, 4, &ok);
+    if (ok)
+        drawMeshArea->h_target = h_target;
+}
+
+void MainWindow::setsmoothingiters(){
+    bool ok;
+    int iters = QInputDialog::getInt(this, tr("DrawMesh"),
+                                        tr("Choose Maximum number of smoothing iterations:"),
+                                        drawMeshArea->max_smoothing_iters,
+                                        1, 1000, 1, &ok);
+    if (ok)
+        drawMeshArea->max_smoothing_iters = iters;
+}
+
+void MainWindow::triangulate(){
+    drawMeshArea->mesh.Triangulate(drawMeshArea->coords);
+    drawMeshArea->showMesh();
+}
+
+void MainWindow::constrainedTriangulate(){
+    drawMeshArea->mesh.Triangulate(drawMeshArea->coords, drawMeshArea->segments);
+    drawMeshArea->showMesh();
+}
+
+void MainWindow::refineMesh(){
+    drawMeshArea->mesh.Refine(drawMeshArea->h_target);
+    drawMeshArea->showMesh();
+}
+
+void MainWindow::smoothMesh(){
+    drawMeshArea->mesh.Smooth(drawMeshArea->max_smoothing_iters);
+    drawMeshArea->showMesh();
+}
+
+void MainWindow::computeVolumeLengthMetric(){
+    drawMeshArea->mesh.Compute_volume_length_metric();
+    drawMeshArea->showQuality();
+}
+
 void MainWindow::createActions()
 {
     penColorAct = new QAction(tr("&Pen Color..."), this);
@@ -81,6 +126,33 @@ void MainWindow::createActions()
 
     aboutQtAct = new QAction(tr("About &Qt"), this);
     connect(aboutQtAct, &QAction::triggered, qApp, &QApplication::aboutQt);
+
+    // mesh actions
+    sethtargetAct = new QAction(tr("&Set h target"), this);
+    connect(sethtargetAct, &QAction::triggered, this, &MainWindow::sethtarget);
+
+    setsmoothingitersAct = new QAction(tr("&Set Max Smoothing Iterations"), this);
+    connect(setsmoothingitersAct, &QAction::triggered, this, &MainWindow::setsmoothingiters);
+
+    triangulateAct = new QAction(tr("&Triangulate"), this);
+    triangulateAct->setShortcut(tr("Ctrl+T"));
+    connect(triangulateAct, &QAction::triggered, this, &MainWindow::triangulate);
+
+    constrainedTriangulateAct = new QAction(tr("&Constrained Triangulation"), this);
+    constrainedTriangulateAct->setShortcut(tr("Ctrl+Shift+T"));
+    connect(constrainedTriangulateAct, &QAction::triggered, this, &MainWindow::constrainedTriangulate);
+
+    refineMeshAct = new QAction(tr("&Refine Mesh"), this);
+    refineMeshAct->setShortcut(tr("Ctrl+R"));
+    connect(refineMeshAct, &QAction::triggered, this, &MainWindow::refineMesh);
+
+    smoothMeshAct = new QAction(tr("&Smooth Mesh"), this);
+    smoothMeshAct->setShortcut(tr("Ctrl+S"));
+    connect(smoothMeshAct, &QAction::triggered, this, &MainWindow::smoothMesh);
+
+    ComputeVolumeLengthMetricAct = new QAction(tr("&Compute Volume Length Metric"), this);
+    ComputeVolumeLengthMetricAct->setShortcut(tr("Ctrl+A"));
+    connect(ComputeVolumeLengthMetricAct, &QAction::triggered, this, &MainWindow::computeVolumeLengthMetric);
 }
 
 void MainWindow::createMenus()
@@ -95,6 +167,21 @@ void MainWindow::createMenus()
     helpMenu->addAction(aboutAct);
     helpMenu->addAction(aboutQtAct);
 
+    meshMenu = new QMenu(tr("&Mesh"), this);
+    meshMenu->addAction(sethtargetAct);
+    meshMenu->addAction(setsmoothingitersAct);
+    meshMenu->addSeparator();
+    meshMenu->addAction(triangulateAct);
+    meshMenu->addAction(constrainedTriangulateAct);
+    meshMenu->addSeparator();
+    meshMenu->addAction(refineMeshAct);
+    meshMenu->addAction(smoothMeshAct);
+    meshMenu->addSeparator();
+    meshMenu->addAction(ComputeVolumeLengthMetricAct);
+
+    
+
     menuBar()->addMenu(optionMenu);
     menuBar()->addMenu(helpMenu);
+    menuBar()->addMenu(meshMenu);
 }

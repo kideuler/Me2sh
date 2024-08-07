@@ -21,6 +21,15 @@ private slots:
     void penWidth();
     void about();
 
+    // meshing slots
+    void sethtarget();
+    void setsmoothingiters();
+    void triangulate();
+    void constrainedTriangulate();
+    void refineMesh();
+    void smoothMesh();
+    void computeVolumeLengthMetric();
+
 private:
     void createActions();
     void createMenus();
@@ -29,6 +38,7 @@ private:
 
     QMenu *optionMenu;
     QMenu *helpMenu;
+    QMenu *meshMenu;
 
     QAction *exitAct;
     QAction *penColorAct;
@@ -37,6 +47,15 @@ private:
     QAction *clearScreenAct;
     QAction *aboutAct;
     QAction *aboutQtAct;
+
+    // meshing actions
+    QAction *sethtargetAct;
+    QAction *setsmoothingitersAct;
+    QAction *triangulateAct;
+    QAction *constrainedTriangulateAct;
+    QAction *refineMeshAct;
+    QAction *smoothMeshAct;
+    QAction *ComputeVolumeLengthMetricAct;
 };
 
 #endif
