@@ -427,6 +427,7 @@ double Cube(struct DoubleMatrix* coords, int npoints){
             }
         }
     }
+    return h;
 }
 
 double Sphere(struct DoubleMatrix* coords, int npoints, bool box){

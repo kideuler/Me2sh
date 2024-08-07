@@ -21,6 +21,16 @@ void Mesh_print(struct Mesh *msh){
     IntMatrix_print(&msh->sibhfs);
 }
 
+void Mesh_delete(struct Mesh *msh) {
+    free(msh->coords.data);
+    free(msh->elems.data);
+    free(msh->sibhfs.data);
+    free(msh->delete_elem);
+    free(msh->bwork);
+    free(msh->on_boundary);
+    free(msh->stack);
+}
+
 // Use Delaunay mesh to refine mesh
 void GeoMesh_DelaunayRefine(struct Mesh *msh, bool use_edgelengh, double h_target, int point_algorithm){
     int nv = msh->coords.nrows;
