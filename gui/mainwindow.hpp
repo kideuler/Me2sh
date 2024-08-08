@@ -32,6 +32,7 @@ private slots:
 
     // splining slots
     void makeSpline();
+    void makeBezier();
 
 private:
     void createActions();
@@ -63,6 +64,7 @@ private:
 
     // splining actions
     QAction *makeSplineAct;
+    QAction *makeBezierAct;
 };
 
 #endif

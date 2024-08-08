@@ -295,3 +295,48 @@ void DrawMeshArea::showSpline(){
 
     update();
 }
+
+void DrawMeshArea::showBezier(){
+    QPainter painter(&image);
+    painter.setPen(QPen(Qt::red, 1, Qt::SolidLine));
+    int npoints = 500;
+    double dt = 1.0/(double)(npoints-1);
+
+    std::array<double,2> xy = bezier.eval(0.0);
+    int x = xy[0]*width();
+    int y = (1.0-xy[1])*height();
+    lastPoint = QPoint(x,y);
+
+    for (double n = 1; n<npoints; ++n){
+        double t = n*dt;
+        std::array<double,2> xy = bezier.eval(t);
+        x = xy[0]*width();
+        y = (1.0-xy[1])*height();
+        QPoint p = QPoint(x,y);
+        painter.drawLine(lastPoint,p);
+        lastPoint = p;
+    }
+
+    npoints = 50;
+    double dh = 0.01;
+    dt = 1.0/(double)(npoints);
+    int nx,ny;
+    painter.setPen(QPen(Qt::black, 1, Qt::SolidLine));
+    for (double n = 1; n<npoints; ++n){
+        double t = n*dt;
+        std::array<double,2> xy = bezier.eval(t);
+        x = xy[0]*width();
+        y = (1.0-xy[1])*height();
+        lastPoint = QPoint(x,y);
+
+        std::array<double,2> N = bezier.normal(t);
+        N[0] = xy[0] + dh*N[0];
+        N[1] = xy[1] + dh*N[1];
+        nx = N[0]*width();
+        ny = (1.0-N[1])*height();
+        QPoint np = QPoint(nx,ny);
+        painter.drawLine(lastPoint,np);
+    }
+
+    update();
+}

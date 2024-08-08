@@ -60,6 +60,20 @@ void Spline2D::init(const Matrix<double> &coords, int degree){
     }
     params[nv] = 1.0;
     delete[] temp;
+
+    int npoints = 1000;
+    double dt = 1.0 / (double(npoints));
+    double t,x,y;
+    double al = 0.0;
+    xy = eval(0.0);
+    x = xy[0]; y = xy[1];
+    for (int i = 1; i<npoints; i++){
+        t = i*dt;
+        xy = eval(t);
+        al += sqrt((xy[0]-x)*(xy[0]-x) + (xy[1]-y)*(xy[1]-y));
+        x = xy[0]; y = xy[1];
+    }
+    arclength = al;
 }
 
 
@@ -213,7 +227,7 @@ std::array<double,2> Spline2D::normal(double t){
 }
 
 void Spline2D::create_segments(double h_target, Matrix<double> &coords, Matrix<int> &segments){
-    int npoints = (int) 2*(1.0/(h_target));
+    int npoints = (int) (arclength/(h_target));
     double dt = 1.0 / (double(npoints));
 
     coords = Matrix<double>(0,0);

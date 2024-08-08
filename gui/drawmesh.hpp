@@ -8,6 +8,7 @@
 
 #include "TriMesh.hpp"
 #include "Spline.hpp"
+#include "Bezier.hpp"
 
 class DrawMeshArea : public QWidget
 {
@@ -22,6 +23,7 @@ public:
     // drawing mesh
     void showMesh();
     void showSpline();
+    void showBezier();
     void showQuality();
 
     bool isModified() const { return modified; }
@@ -39,6 +41,7 @@ public:
 
     // splines
     Spline2D spline;
+    Bezier2D bezier;
 
 public slots:
     void clearImage();

@@ -92,6 +92,10 @@ void MainWindow::triangulate(){
         drawMeshArea->spline.create_segments(drawMeshArea->h_target, drawMeshArea->coords, drawMeshArea->segments);
         drawMeshArea->mesh.Triangulate(drawMeshArea->coords);
         drawMeshArea->showMesh();
+    } else if (drawMeshArea->bezier.npoints() > 0){
+        drawMeshArea->bezier.create_segments(drawMeshArea->h_target, drawMeshArea->coords, drawMeshArea->segments);
+        drawMeshArea->mesh.Triangulate(drawMeshArea->coords);
+        drawMeshArea->showMesh();
     }
     
 }
@@ -102,6 +106,10 @@ void MainWindow::constrainedTriangulate(){
         drawMeshArea->showMesh();
     } else if (drawMeshArea->spline.npoints() > 0){
         drawMeshArea->spline.create_segments(drawMeshArea->h_target, drawMeshArea->coords, drawMeshArea->segments);
+        drawMeshArea->mesh.Triangulate(drawMeshArea->coords, drawMeshArea->segments);
+        drawMeshArea->showMesh();
+    } else if (drawMeshArea->bezier.npoints() > 0){
+        drawMeshArea->bezier.create_segments(drawMeshArea->h_target, drawMeshArea->coords, drawMeshArea->segments);
         drawMeshArea->mesh.Triangulate(drawMeshArea->coords, drawMeshArea->segments);
         drawMeshArea->showMesh();
     }
@@ -123,9 +131,17 @@ void MainWindow::computeVolumeLengthMetric(){
 }
 
 void MainWindow::makeSpline(){
+    drawMeshArea->bezier.reset();
+    drawMeshArea->spline.reset();
     drawMeshArea->spline.init(drawMeshArea->Cpoints);
     drawMeshArea->showSpline();
-    std::cout << "arclength: " << drawMeshArea->spline.get_arclength() <<std::endl;
+}
+
+void MainWindow::makeBezier(){
+    drawMeshArea->bezier.reset();
+    drawMeshArea->spline.reset();
+    drawMeshArea->bezier.init(drawMeshArea->Cpoints);
+    drawMeshArea->showBezier();
 }
 
 void MainWindow::createActions()
@@ -178,6 +194,10 @@ void MainWindow::createActions()
     makeSplineAct = new QAction(tr("&Make Cubic Spline"), this);
     makeSplineAct->setShortcut(tr("Ctrl+1"));
     connect(makeSplineAct, &QAction::triggered, this, &MainWindow::makeSpline);
+
+    makeBezierAct = new QAction(tr("&Make Bezier Spline"), this);
+    makeBezierAct->setShortcut(tr("Ctrl+2"));
+    connect(makeBezierAct, &QAction::triggered, this, &MainWindow::makeBezier);
 }
 
 void MainWindow::createMenus()
@@ -210,6 +230,7 @@ void MainWindow::createMenus()
     // spline menu
     splineMenu = new QMenu(tr("&Spline"), this);
     splineMenu->addAction(makeSplineAct);
+    splineMenu->addAction(makeBezierAct);
     
 
     menuBar()->addMenu(optionMenu);

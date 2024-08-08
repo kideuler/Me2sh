@@ -99,6 +99,15 @@ class Matrix {
         const T& operator()(size_t i, size_t j) const {
             return arr[i*cols + j];
         }
+
+        void print(){
+            for (int i = 0; i<rows; ++i){
+                for (int j = 0; j<cols; ++j){
+                    std::cout << arr[i*cols + j] << " ";
+                }
+                std::cout << std::endl;
+            }
+        }
 };
 
 #include "Spline.hpp"
