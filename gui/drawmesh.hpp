@@ -21,6 +21,7 @@ public:
 
     // drawing mesh
     void showMesh();
+    void showSpline();
     void showQuality();
 
     bool isModified() const { return modified; }
@@ -30,6 +31,7 @@ public:
 
     // trimesh arrays
     Matrix<double> coords;
+    Matrix<double> Cpoints;
     Matrix<int> segments;
     Mesh2D mesh;
     double h_target = 0.05;
@@ -51,6 +53,7 @@ protected:
 
 private:
     void drawLineTo(const QPoint &endPoint);
+    void drawPoint(const QPoint &P);
     void resizeImage(QImage *image, const QSize &newSize);
 
     bool modified = false;

@@ -30,6 +30,9 @@ private slots:
     void smoothMesh();
     void computeVolumeLengthMetric();
 
+    // splining slots
+    void makeSpline();
+
 private:
     void createActions();
     void createMenus();
@@ -39,6 +42,7 @@ private:
     QMenu *optionMenu;
     QMenu *helpMenu;
     QMenu *meshMenu;
+    QMenu *splineMenu;
 
     QAction *exitAct;
     QAction *penColorAct;
@@ -56,6 +60,9 @@ private:
     QAction *refineMeshAct;
     QAction *smoothMeshAct;
     QAction *ComputeVolumeLengthMetricAct;
+
+    // splining actions
+    QAction *makeSplineAct;
 };
 
 #endif

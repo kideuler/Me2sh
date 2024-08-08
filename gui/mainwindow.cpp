@@ -15,6 +15,7 @@ MainWindow::MainWindow(QWidget *parent)
 {   
     drawMeshArea->coords.cols = 2;
     drawMeshArea->segments.cols = 2;
+    drawMeshArea->Cpoints.cols = 2;
     setCentralWidget(drawMeshArea);
 
     createActions();
@@ -84,13 +85,26 @@ void MainWindow::setsmoothingiters(){
 }
 
 void MainWindow::triangulate(){
-    drawMeshArea->mesh.Triangulate(drawMeshArea->coords);
-    drawMeshArea->showMesh();
+    if (drawMeshArea->coords.nrows() > 0){
+        drawMeshArea->mesh.Triangulate(drawMeshArea->coords);
+        drawMeshArea->showMesh();
+    } else if (drawMeshArea->spline.npoints() > 0){
+        drawMeshArea->spline.create_segments(drawMeshArea->h_target, drawMeshArea->coords, drawMeshArea->segments);
+        drawMeshArea->mesh.Triangulate(drawMeshArea->coords);
+        drawMeshArea->showMesh();
+    }
+    
 }
 
 void MainWindow::constrainedTriangulate(){
-    drawMeshArea->mesh.Triangulate(drawMeshArea->coords, drawMeshArea->segments);
-    drawMeshArea->showMesh();
+    if (drawMeshArea->coords.nrows() > 0){
+        drawMeshArea->mesh.Triangulate(drawMeshArea->coords, drawMeshArea->segments);
+        drawMeshArea->showMesh();
+    } else if (drawMeshArea->spline.npoints() > 0){
+        drawMeshArea->spline.create_segments(drawMeshArea->h_target, drawMeshArea->coords, drawMeshArea->segments);
+        drawMeshArea->mesh.Triangulate(drawMeshArea->coords, drawMeshArea->segments);
+        drawMeshArea->showMesh();
+    }
 }
 
 void MainWindow::refineMesh(){
@@ -106,6 +120,12 @@ void MainWindow::smoothMesh(){
 void MainWindow::computeVolumeLengthMetric(){
     drawMeshArea->mesh.Compute_volume_length_metric();
     drawMeshArea->showQuality();
+}
+
+void MainWindow::makeSpline(){
+    drawMeshArea->spline.init(drawMeshArea->Cpoints);
+    drawMeshArea->showSpline();
+    std::cout << "arclength: " << drawMeshArea->spline.get_arclength() <<std::endl;
 }
 
 void MainWindow::createActions()
@@ -153,20 +173,28 @@ void MainWindow::createActions()
     ComputeVolumeLengthMetricAct = new QAction(tr("&Compute Volume Length Metric"), this);
     ComputeVolumeLengthMetricAct->setShortcut(tr("Ctrl+A"));
     connect(ComputeVolumeLengthMetricAct, &QAction::triggered, this, &MainWindow::computeVolumeLengthMetric);
+
+    // spline actions
+    makeSplineAct = new QAction(tr("&Make Cubic Spline"), this);
+    makeSplineAct->setShortcut(tr("Ctrl+1"));
+    connect(makeSplineAct, &QAction::triggered, this, &MainWindow::makeSpline);
 }
 
 void MainWindow::createMenus()
 {
+    // options menu
     optionMenu = new QMenu(tr("&Options"), this);
     optionMenu->addAction(penColorAct);
     optionMenu->addAction(penWidthAct);
     optionMenu->addSeparator();
     optionMenu->addAction(clearScreenAct);
 
+    // help menu
     helpMenu = new QMenu(tr("&Help"), this);
     helpMenu->addAction(aboutAct);
     helpMenu->addAction(aboutQtAct);
 
+    // mesh menu
     meshMenu = new QMenu(tr("&Mesh"), this);
     meshMenu->addAction(sethtargetAct);
     meshMenu->addAction(setsmoothingitersAct);
@@ -179,9 +207,13 @@ void MainWindow::createMenus()
     meshMenu->addSeparator();
     meshMenu->addAction(ComputeVolumeLengthMetricAct);
 
+    // spline menu
+    splineMenu = new QMenu(tr("&Spline"), this);
+    splineMenu->addAction(makeSplineAct);
     
 
     menuBar()->addMenu(optionMenu);
     menuBar()->addMenu(helpMenu);
     menuBar()->addMenu(meshMenu);
+    menuBar()->addMenu(splineMenu);
 }

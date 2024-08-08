@@ -2,6 +2,7 @@
 
 #include <QMouseEvent>
 #include <QPainter>
+#include <QApplication>
 
 #if defined(QT_PRINTSUPPORT_LIB)
 #include <QtPrintSupport/qtprintsupportglobal.h>
@@ -36,17 +37,32 @@ void DrawMeshArea::clearImage()
     coords.cols = 2;
     segments = Matrix<int>(0,0);
     segments.cols = 2;
+    Cpoints = Matrix<double>(0,0);
+    Cpoints.cols = 2;
+    spline.reset();
     update();
 }
 
 void DrawMeshArea::mousePressEvent(QMouseEvent *event)
 {
-    if (event->button() == Qt::LeftButton) {
-        lastPoint = event->position().toPoint();
-        firstPoint = event->position().toPoint();
-        firstPointIndex = coords.nrows();
-        scribbling = true;
-        firstpointinit = true;
+    if (Qt::ShiftModifier == QApplication::keyboardModifiers()){
+        if (event->button() == Qt::LeftButton) {
+            double x = (double)event->position().x()/(double)width();
+            double y = 1.0-(double)event->position().y()/(double)height();
+            Cpoints.arr.push_back(x);
+            Cpoints.arr.push_back(y);
+            Cpoints.rows++;
+            drawPoint(event->position().toPoint());
+            update();
+        }
+    } else{
+        if (event->button() == Qt::LeftButton) {
+            lastPoint = event->position().toPoint();
+            firstPoint = event->position().toPoint();
+            firstPointIndex = coords.nrows();
+            scribbling = true;
+            firstpointinit = true;
+        }
     }
 }
 
@@ -119,6 +135,14 @@ void DrawMeshArea::drawLineTo(const QPoint &endPoint)
     update(QRect(lastPoint, endPoint).normalized()
                                      .adjusted(-rad, -rad, +rad, +rad));
     lastPoint = endPoint;
+}
+
+void DrawMeshArea::drawPoint(const QPoint &P){
+    QPainter painter(&image);
+    painter.setBrush(Qt::black);
+    painter.drawEllipse(P, myPenWidth, myPenWidth);
+    modified = true;
+    update();
 }
 
 void DrawMeshArea::resizeImage(QImage *image, const QSize &newSize)
@@ -199,5 +223,48 @@ void DrawMeshArea::showQuality(){
 
         painter.drawPolygon(points, 3);
     }
+    update();
+}
+
+void DrawMeshArea::showSpline(){
+
+    int npoints = 500;
+    double dt = 1.0/(double)(npoints-1);
+
+    std::array<double,2> xy = spline.eval(0.0);
+    int x = xy[0]*width();
+    int y = (1.0-xy[1])*height();
+    lastPoint = QPoint(x,y);
+
+    for (double n = 1; n<npoints; ++n){
+        double t = n*dt;
+        std::array<double,2> xy = spline.eval(t);
+        x = xy[0]*width();
+        y = (1.0-xy[1])*height();
+        QPoint p = QPoint(x,y);
+        drawLineTo(p);
+        lastPoint = p;
+    }
+
+    npoints = 50;
+    double dh = 0.01;
+    dt = 1.0/(double)(npoints);
+    int nx,ny;
+    for (double n = 1; n<npoints; ++n){
+        double t = n*dt;
+        std::array<double,2> xy = spline.eval(t);
+        x = xy[0]*width();
+        y = (1.0-xy[1])*height();
+        lastPoint = QPoint(x,y);
+
+        std::array<double,2> N = spline.normal(t);
+        N[0] = xy[0] + dh*N[0];
+        N[1] = xy[1] + dh*N[1];
+        nx = N[0]*width();
+        ny = (1.0-N[1])*height();
+        QPoint np = QPoint(nx,ny);
+        drawLineTo(np);
+    }
+
     update();
 }
