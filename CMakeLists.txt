@@ -2,17 +2,20 @@ cmake_minimum_required(VERSION 3.5)
 
 project(
   Me2sh
-  VERSION 0.0.1
+  VERSION 0.0.2
   LANGUAGES CXX C)
+
+include(CTest)
 
 set(CMAKE_OSX_ARCHITECTURES "arm64")
 
-# trimesh library
 include_directories(
     ${CMAKE_CURRENT_SOURCE_DIR}/Trimesh #triangular mesh generation
     ${CMAKE_CURRENT_SOURCE_DIR}/gui #gui using qt
+    ${CMAKE_CURRENT_SOURCE_DIR}/Splines #splines for geometry
     )
 
+# trimesh library
 add_library(Trimesh 
     ${CMAKE_CURRENT_SOURCE_DIR}/Trimesh/GeoMesh_Linalg.c
     ${CMAKE_CURRENT_SOURCE_DIR}/Trimesh/GeoMesh2d.c
@@ -26,13 +29,13 @@ add_library(Trimesh
     )
 
 
-
-# adding test for trimesh library
-add_executable(TrimeshTest ${CMAKE_CURRENT_SOURCE_DIR}/Tests/TrimeshTest.cpp)
-target_link_libraries(TrimeshTest PRIVATE Trimesh)
-
-
-
+# finding eigen and adding spline library
+find_package(Eigen3 REQUIRED)
+add_library(Splines
+    ${CMAKE_CURRENT_SOURCE_DIR}/Splines/Spline.cpp
+    ${CMAKE_CURRENT_SOURCE_DIR}/Splines/Spline.hpp
+)
+target_link_libraries(Splines Eigen3::Eigen)
 
 find_package(Qt6
     REQUIRED COMPONENTS Core Gui Widgets
@@ -58,5 +61,13 @@ target_link_libraries(me2sh PRIVATE
     Qt6::Core
     Qt6::Gui
     Qt6::Widgets
+    Splines
     Trimesh
 )
+
+
+# adding test for trimesh library
+add_executable(TrimeshTest ${CMAKE_CURRENT_SOURCE_DIR}/Tests/TrimeshTest.cpp)
+target_link_libraries(TrimeshTest PRIVATE Splines Trimesh)
+add_test(NAME TrimeshTest
+         COMMAND TrimeshTest)

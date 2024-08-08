@@ -7,6 +7,7 @@
 #include <QWidget>
 
 #include "TriMesh.hpp"
+#include "Spline.hpp"
 
 class DrawMeshArea : public QWidget
 {
@@ -31,8 +32,11 @@ public:
     Matrix<double> coords;
     Matrix<int> segments;
     Mesh2D mesh;
-    double h_target = 0.01;
+    double h_target = 0.05;
     int max_smoothing_iters = 100;
+
+    // splines
+    Spline2D spline;
 
 public slots:
     void clearImage();

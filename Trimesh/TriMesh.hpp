@@ -1,5 +1,5 @@
-#ifndef TRIMESH
-#define TRIMESH
+#ifndef TRIMESH_HPP
+#define TRIMESH_HPP
 
 extern "C" {
 #include "GeoMesh.h"
@@ -17,7 +17,8 @@ extern "C" {
  * 
  * @tparam T data type of matrix
  */
-template <typename T> class Matrix { 
+template <typename T>
+class Matrix { 
 
     public:
         std::vector<T> arr;
@@ -100,6 +101,7 @@ template <typename T> class Matrix {
         }
 };
 
+#include "Spline.hpp"
 /**
  * @brief 2D mesh class
  * 
