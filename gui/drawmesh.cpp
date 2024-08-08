@@ -45,7 +45,15 @@ void DrawMeshArea::clearImage()
 
 void DrawMeshArea::mousePressEvent(QMouseEvent *event)
 {
-    if (Qt::ShiftModifier == QApplication::keyboardModifiers()){
+    if (Qt::ControlModifier == QApplication::keyboardModifiers()){
+        if (event->button() == Qt::LeftButton) {
+            lastPoint = event->position().toPoint();
+            firstPoint = event->position().toPoint();
+            firstPointIndex = coords.nrows();
+            scribbling = true;
+            firstpointinit = true;
+        }
+    } else if (Qt::ShiftModifier == QApplication::keyboardModifiers()){
         if (event->button() == Qt::LeftButton) {
             double x = (double)event->position().x()/(double)width();
             double y = 1.0-(double)event->position().y()/(double)height();
@@ -68,25 +76,41 @@ void DrawMeshArea::mousePressEvent(QMouseEvent *event)
 
 void DrawMeshArea::mouseMoveEvent(QMouseEvent *event)
 {
-    if ((event->buttons() & Qt::LeftButton) && scribbling){
-        QPoint p = event->position().toPoint();
-        
-        if (!(p.x()==lastPoint.x() || p.y() == lastPoint.y())) {
-            double x = (double)lastPoint.x()/(double)width();
-            double y = 1.0-(double)lastPoint.y()/(double)height();
-            coords.arr.push_back(x);
-            coords.arr.push_back(y);
-            coords.rows++;
+    if (Qt::ControlModifier == QApplication::keyboardModifiers()){
+        if ((event->buttons() & Qt::LeftButton) && scribbling){
+            QPoint p = event->position().toPoint();
+            
+            if (!(p.x()==lastPoint.x() || p.y() == lastPoint.y())) {
+                double x = (double)lastPoint.x()/(double)width();
+                double y = 1.0-(double)lastPoint.y()/(double)height();
+                Cpoints.arr.push_back(x);
+                Cpoints.arr.push_back(y);
+                Cpoints.rows++;
 
-            if (firstpointinit){
-                firstpointinit = false;
-            }else {
-                segments.arr.push_back(coords.nrows()-2);
-                segments.arr.push_back(coords.nrows()-1);
-                segments.rows++;
+                drawLineTo(p);
             }
+        }
+    } else {
+        if ((event->buttons() & Qt::LeftButton) && scribbling){
+            QPoint p = event->position().toPoint();
+            
+            if (!(p.x()==lastPoint.x() || p.y() == lastPoint.y())) {
+                double x = (double)lastPoint.x()/(double)width();
+                double y = 1.0-(double)lastPoint.y()/(double)height();
+                coords.arr.push_back(x);
+                coords.arr.push_back(y);
+                coords.rows++;
 
-            drawLineTo(p);
+                if (firstpointinit){
+                    firstpointinit = false;
+                }else {
+                    segments.arr.push_back(coords.nrows()-2);
+                    segments.arr.push_back(coords.nrows()-1);
+                    segments.rows++;
+                }
+
+                drawLineTo(p);
+            }
         }
     }
 }
@@ -227,7 +251,9 @@ void DrawMeshArea::showQuality(){
 }
 
 void DrawMeshArea::showSpline(){
-
+    image.fill(qRgb(255, 255, 255));
+    QPainter painter(&image);
+    painter.setPen(QPen(Qt::red, 1, Qt::SolidLine));
     int npoints = 500;
     double dt = 1.0/(double)(npoints-1);
 
@@ -242,7 +268,7 @@ void DrawMeshArea::showSpline(){
         x = xy[0]*width();
         y = (1.0-xy[1])*height();
         QPoint p = QPoint(x,y);
-        drawLineTo(p);
+        painter.drawLine(lastPoint,p);
         lastPoint = p;
     }
 
@@ -250,6 +276,7 @@ void DrawMeshArea::showSpline(){
     double dh = 0.01;
     dt = 1.0/(double)(npoints);
     int nx,ny;
+    painter.setPen(QPen(Qt::black, 1, Qt::SolidLine));
     for (double n = 1; n<npoints; ++n){
         double t = n*dt;
         std::array<double,2> xy = spline.eval(t);
@@ -263,7 +290,7 @@ void DrawMeshArea::showSpline(){
         nx = N[0]*width();
         ny = (1.0-N[1])*height();
         QPoint np = QPoint(nx,ny);
-        drawLineTo(np);
+        painter.drawLine(lastPoint,np);
     }
 
     update();
