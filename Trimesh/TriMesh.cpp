@@ -362,3 +362,26 @@ void Mesh2D::print(){
         std::cout << this->elems(i,0) << "," << this->elems(i,1) << "," << this->elems(i,2) << " | " << this->elems_on_boundary[i] << std::endl;
     }
 }
+
+
+void Mesh2D::compute_boundary_nodes(){
+    nodes_on_boundary.resize(coords.nrows());
+    elems_on_boundary.resize(elems.nrows());
+
+    std::fill(nodes_on_boundary.begin(), nodes_on_boundary.end(), false);
+    for (int i = 0; i<elems.nrows(); i++){
+        for (int j = 0; j<3; j++){
+            if (sibhfs(i,j) == 0){
+                elems_on_boundary[i] = true;
+                nodes_on_boundary[elems(i,j)] = true;
+                nodes_on_boundary[elems(i,(j+1)%3)] = true;
+            }
+        }
+    }
+
+    for (int i = 0; i<coords.nrows(); i++){
+        if (nodes_on_boundary[i]){
+            bndnodes.push_back(i);
+        }
+    }
+}

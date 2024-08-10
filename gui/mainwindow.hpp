@@ -4,6 +4,9 @@
 #include <QList>
 #include <QMainWindow>
 
+#include "drawmesh.hpp"
+#include "ConsoleOutput.hpp"
+
 class DrawMeshArea;
 
 class MainWindow : public QMainWindow
@@ -20,6 +23,7 @@ private slots:
     void penColor();
     void penWidth();
     void about();
+    void clearScreen();
 
     // meshing slots
     void sethtarget();
@@ -39,6 +43,7 @@ private:
     void createMenus();
 
     DrawMeshArea *drawMeshArea;
+    ConsoleOutput *msgBox;
 
     QMenu *optionMenu;
     QMenu *helpMenu;
@@ -52,6 +57,7 @@ private:
     QAction *clearScreenAct;
     QAction *aboutAct;
     QAction *aboutQtAct;
+    QAction *clearAct;
 
     // meshing actions
     QAction *sethtargetAct;

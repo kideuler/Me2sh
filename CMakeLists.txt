@@ -52,6 +52,8 @@ qt_add_executable(me2sh
     ${CMAKE_CURRENT_SOURCE_DIR}/gui/mainwindow.hpp
     ${CMAKE_CURRENT_SOURCE_DIR}/gui/drawmesh.cpp 
     ${CMAKE_CURRENT_SOURCE_DIR}/gui/drawmesh.hpp
+    ${CMAKE_CURRENT_SOURCE_DIR}/gui/ConsoleOutput.hpp
+    ${CMAKE_CURRENT_SOURCE_DIR}/gui/ConsoleOutput.cpp
 )
 
 set_target_properties(me2sh PROPERTIES

@@ -1,5 +1,4 @@
 #include "mainwindow.hpp"
-#include "drawmesh.hpp"
 
 #include <QApplication>
 #include <QColorDialog>
@@ -9,6 +8,9 @@
 #include <QMenuBar>
 #include <QMessageBox>
 #include <QCloseEvent>
+#include <QSplitter>
+#include <QSettings>
+#include <chrono>
 
 MainWindow::MainWindow(QWidget *parent)
     : QMainWindow(parent), drawMeshArea(new DrawMeshArea(this))
@@ -16,8 +18,18 @@ MainWindow::MainWindow(QWidget *parent)
     drawMeshArea->coords.cols = 2;
     drawMeshArea->segments.cols = 2;
     drawMeshArea->Cpoints.cols = 2;
-    setCentralWidget(drawMeshArea);
 
+    setCentralWidget(drawMeshArea);
+    msgBox = new ConsoleOutput(this);
+
+    QSettings settings;
+    int height = settings.value("Split", 600).toInt();
+    QSplitter *centralWidget = new QSplitter(Qt::Vertical, this);
+    centralWidget->addWidget(drawMeshArea);
+    centralWidget->addWidget(msgBox);
+    centralWidget->setSizes(QList<int>{height, 800-height});
+
+    setCentralWidget(centralWidget);
     createActions();
     createMenus();
 
@@ -64,6 +76,11 @@ void MainWindow::about()
                "to repaint widgets.</p>"));
 }
 
+void MainWindow::clearScreen(){
+    drawMeshArea->clearImage();
+    msgBox->clear();
+}
+
 void MainWindow::sethtarget(){
     bool ok;
     double h_target = QInputDialog::getDouble(this, tr("DrawMesh"),
@@ -85,6 +102,8 @@ void MainWindow::setsmoothingiters(){
 }
 
 void MainWindow::triangulate(){
+    std::chrono::time_point<std::chrono::system_clock> start, end;
+    start = std::chrono::system_clock::now();
     if (drawMeshArea->coords.nrows() > 0){
         drawMeshArea->mesh.Triangulate(drawMeshArea->coords);
         drawMeshArea->showMesh();
@@ -97,10 +116,15 @@ void MainWindow::triangulate(){
         drawMeshArea->mesh.Triangulate(drawMeshArea->coords);
         drawMeshArea->showMesh();
     }
+    end = std::chrono::system_clock::now();
+    std::chrono::duration<double> elapsed_seconds = end-start;
+    msgBox->addMessage(QString::fromStdString("Triangulation time: " + std::to_string(elapsed_seconds.count()) + " seconds"));
     
 }
 
 void MainWindow::constrainedTriangulate(){
+    std::chrono::time_point<std::chrono::system_clock> start, end;
+    start = std::chrono::system_clock::now();
     if (drawMeshArea->coords.nrows() > 0){
         drawMeshArea->mesh.Triangulate(drawMeshArea->coords, drawMeshArea->segments);
         drawMeshArea->showMesh();
@@ -113,34 +137,62 @@ void MainWindow::constrainedTriangulate(){
         drawMeshArea->mesh.Triangulate(drawMeshArea->coords, drawMeshArea->segments);
         drawMeshArea->showMesh();
     }
+    end = std::chrono::system_clock::now();
+    std::chrono::duration<double> elapsed_seconds = end-start;
+    msgBox->addMessage(QString::fromStdString("Constrained Triangulation time: " + std::to_string(elapsed_seconds.count()) + " seconds"));
 }
 
 void MainWindow::refineMesh(){
+    std::chrono::time_point<std::chrono::system_clock> start, end;
+    start = std::chrono::system_clock::now();
     drawMeshArea->mesh.Refine(drawMeshArea->h_target);
+    end = std::chrono::system_clock::now();
+    std::chrono::duration<double> elapsed_seconds = end-start;
+    msgBox->addMessage(QString::fromStdString("Mesh Refinement time: " + std::to_string(elapsed_seconds.count()) + " seconds"));
     drawMeshArea->showMesh();
 }
 
 void MainWindow::smoothMesh(){
+    std::chrono::time_point<std::chrono::system_clock> start, end;
+    start = std::chrono::system_clock::now();
     drawMeshArea->mesh.Smooth(drawMeshArea->max_smoothing_iters);
+    end = std::chrono::system_clock::now();
+    std::chrono::duration<double> elapsed_seconds = end-start;
+    msgBox->addMessage(QString::fromStdString("Mesh Smoothing time: " + std::to_string(elapsed_seconds.count()) + " seconds"));
     drawMeshArea->showMesh();
 }
 
 void MainWindow::computeVolumeLengthMetric(){
+    std::chrono::time_point<std::chrono::system_clock> start, end;
+    start = std::chrono::system_clock::now();
     drawMeshArea->mesh.Compute_volume_length_metric();
+    end = std::chrono::system_clock::now();
+    std::chrono::duration<double> elapsed_seconds = end-start;
+    msgBox->addMessage(QString::fromStdString("Compute Mesh Quality: " + std::to_string(elapsed_seconds.count()) + " seconds"));
     drawMeshArea->showQuality();
 }
 
 void MainWindow::makeSpline(){
     drawMeshArea->bezier.reset();
     drawMeshArea->spline.reset();
+    std::chrono::time_point<std::chrono::system_clock> start, end;
+    start = std::chrono::system_clock::now();
     drawMeshArea->spline.init(drawMeshArea->Cpoints);
+    end = std::chrono::system_clock::now();
+    std::chrono::duration<double> elapsed_seconds = end-start;
+    msgBox->addMessage(QString::fromStdString("Computed Spline: " + std::to_string(elapsed_seconds.count()) + " seconds"));
     drawMeshArea->showSpline();
 }
 
 void MainWindow::makeBezier(){
     drawMeshArea->bezier.reset();
     drawMeshArea->spline.reset();
+    std::chrono::time_point<std::chrono::system_clock> start, end;
+    start = std::chrono::system_clock::now();
     drawMeshArea->bezier.init(drawMeshArea->Cpoints);
+    end = std::chrono::system_clock::now();
+    std::chrono::duration<double> elapsed_seconds = end-start;
+    msgBox->addMessage(QString::fromStdString("Computed Bezier: " + std::to_string(elapsed_seconds.count()) + " seconds"));
     drawMeshArea->showBezier();
 }
 
@@ -152,10 +204,10 @@ void MainWindow::createActions()
     penWidthAct = new QAction(tr("Pen &Width..."), this);
     connect(penWidthAct, &QAction::triggered, this, &MainWindow::penWidth);
 
-    clearScreenAct = new QAction(tr("&Clear Screen"), this);
-    clearScreenAct->setShortcut(tr("Ctrl+L"));
-    connect(clearScreenAct, &QAction::triggered,
-            drawMeshArea, &DrawMeshArea::clearImage);
+    clearAct = new QAction(tr("&Clear Screen"), this);
+    clearAct->setShortcut(tr("Ctrl+L"));
+    connect(clearAct, &QAction::triggered,
+            this, &MainWindow::clearScreen);
 
     aboutAct = new QAction(tr("&About"), this);
     connect(aboutAct, &QAction::triggered, this, &MainWindow::about);
@@ -207,7 +259,7 @@ void MainWindow::createMenus()
     optionMenu->addAction(penColorAct);
     optionMenu->addAction(penWidthAct);
     optionMenu->addSeparator();
-    optionMenu->addAction(clearScreenAct);
+    optionMenu->addAction(clearAct);
 
     // help menu
     helpMenu = new QMenu(tr("&Help"), this);

@@ -123,6 +123,7 @@ class Mesh2D {
         Matrix<int> sibhfs; // sibling half-faces
         std::vector<bool> elems_on_boundary; // boolean array of elements on boundary
         std::vector<bool> nodes_on_boundary; // boolean array of nodes on boundary
+        std::vector<int> bndnodes; // boundary nodes
         std::vector<double> quality; // quality of elements
 
         /**
@@ -196,6 +197,8 @@ class Mesh2D {
          * 
          */
         void print();
+
+        void compute_boundary_nodes();
 };
 
 

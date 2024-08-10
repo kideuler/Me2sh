@@ -16,6 +16,7 @@ class DrawMeshArea : public QWidget
 
 public:
     DrawMeshArea(QWidget *parent = nullptr);
+    void clearImage();
 
     void setPenColor(const QColor &newColor);
     void setPenWidth(int newWidth);
@@ -36,7 +37,7 @@ public:
     Matrix<double> Cpoints;
     Matrix<int> segments;
     Mesh2D mesh;
-    double h_target = 0.05;
+    double h_target = 0.02;
     int max_smoothing_iters = 100;
 
     // splines
@@ -44,7 +45,6 @@ public:
     Bezier2D bezier;
 
 public slots:
-    void clearImage();
     void print();
 
 protected:
