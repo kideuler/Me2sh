@@ -13,6 +13,7 @@ include_directories(
     ${CMAKE_CURRENT_SOURCE_DIR}/Trimesh #triangular mesh generation
     ${CMAKE_CURRENT_SOURCE_DIR}/gui #gui using qt
     ${CMAKE_CURRENT_SOURCE_DIR}/Splines #splines for geometry
+    ${CMAKE_CURRENT_SOURCE_DIR}/simulation #FEM for simulation
     )
 
 # trimesh library
@@ -38,6 +39,13 @@ add_library(Splines
     ${CMAKE_CURRENT_SOURCE_DIR}/Splines/Bezier.hpp
 )
 target_link_libraries(Splines Eigen3::Eigen)
+
+# adding simulation library
+add_library(Sim
+    ${CMAKE_CURRENT_SOURCE_DIR}/Simulation/Fem.hpp
+    ${CMAKE_CURRENT_SOURCE_DIR}/Simulation/Fem.cpp
+)
+target_link_libraries(Sim Eigen3::Eigen Trimesh)
 
 find_package(Qt6
     REQUIRED COMPONENTS Core Gui Widgets
@@ -67,6 +75,7 @@ target_link_libraries(me2sh PRIVATE
     Qt6::Widgets
     Splines
     Trimesh
+    Sim
 )
 
 
@@ -87,3 +96,9 @@ add_executable(BeziermeshTest ${CMAKE_CURRENT_SOURCE_DIR}/Tests/BeziermeshTest.c
 target_link_libraries(BeziermeshTest PRIVATE Splines Trimesh)
 add_test(NAME BeziermeshTest
          COMMAND BeziermeshTest)
+
+# adding tests for Bezier library
+add_executable(PoissonTest ${CMAKE_CURRENT_SOURCE_DIR}/Tests/PoissonTest.cpp)
+target_link_libraries(PoissonTest PRIVATE Sim)
+add_test(NAME PoissonTest
+         COMMAND PoissonTest)

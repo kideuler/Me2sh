@@ -38,6 +38,10 @@ private slots:
     void makeSpline();
     void makeBezier();
 
+    // simulation slots
+    void solvePoisson();
+    void solveEikonal();
+
 private:
     void createActions();
     void createMenus();
@@ -49,6 +53,7 @@ private:
     QMenu *helpMenu;
     QMenu *meshMenu;
     QMenu *splineMenu;
+    QMenu *simMenu;
 
     QAction *exitAct;
     QAction *penColorAct;
@@ -71,6 +76,10 @@ private:
     // splining actions
     QAction *makeSplineAct;
     QAction *makeBezierAct;
+
+    // simulation actions
+    QAction *solvePoissonAct;
+    QAction *solveEikonalAct;
 };
 
 #endif

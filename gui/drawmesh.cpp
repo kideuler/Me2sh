@@ -340,3 +340,59 @@ void DrawMeshArea::showBezier(){
 
     update();
 }
+
+void DrawMeshArea::showPoisson(){
+    QPainter painter(&image);
+
+    // find min and max of solution
+    double min = fem.u[0];
+    double max = fem.u[0];
+    for (int i = 1; i<fem.u.size(); i++){
+        if (fem.u[i] < min){
+            min = fem.u[i];
+        }
+        if (fem.u[i] > max){
+            max = fem.u[i];
+        }
+    }
+
+    for (int n = 0; n<mesh.coords.nrows(); n++){
+        int x = mesh.coords(n,0)*width();
+        int y = (1.0-mesh.coords(n,1))*height();
+        double u = fem.u[n];
+        int r = 255*((u-min)/(max-min));
+        int b = 255-255*((u-min)/(max-min));
+        painter.setBrush(QColor(r, 0, b));
+        painter.setPen(Qt::NoPen); // Set pen to no pen to avoid drawing lines
+        painter.drawEllipse(QPoint(x,y), 2, 2);
+    }
+    update();
+}
+
+void DrawMeshArea::showEikonal(){
+    QPainter painter(&image);
+
+    // find min and max of solution
+    double min = fem_eikonal.u[0];
+    double max = fem_eikonal.u[0];
+    for (int i = 1; i<fem_eikonal.u.size(); i++){
+        if (fem_eikonal.u[i] < min){
+            min = fem_eikonal.u[i];
+        }
+        if (fem_eikonal.u[i] > max){
+            max = fem_eikonal.u[i];
+        }
+    }
+
+    for (int n = 0; n<mesh.coords.nrows(); n++){
+        int x = mesh.coords(n,0)*width();
+        int y = (1.0-mesh.coords(n,1))*height();
+        double u = fem_eikonal.u[n];
+        int r = 255*((u-min)/(max-min));
+        int b = 255-255*((u-min)/(max-min));
+        painter.setBrush(QColor(r, 0, b));
+        painter.setPen(Qt::NoPen); // Set pen to no pen to avoid drawing lines
+        painter.drawEllipse(QPoint(x,y), 2, 2);
+    }
+    update();
+}

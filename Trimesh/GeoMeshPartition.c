@@ -543,6 +543,7 @@ int separate_line(struct Mesh* msh, struct DoubleMatrix* points_map, int ntries,
     
     free(P); free(qual);
     free(part1); free(part2);
+    return 0;
 }
 
 void partition(int* part1, int* npart1, int* part2, int* npart2, double* quality, int nqual, double percent_cut){

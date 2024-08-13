@@ -9,6 +9,7 @@
 #include "TriMesh.hpp"
 #include "Spline.hpp"
 #include "Bezier.hpp"
+#include "Fem.hpp"
 
 class DrawMeshArea : public QWidget
 {
@@ -26,6 +27,8 @@ public:
     void showSpline();
     void showBezier();
     void showQuality();
+    void showPoisson();
+    void showEikonal();
 
     bool isModified() const { return modified; }
     QColor penColor() const { return myPenColor; }
@@ -43,6 +46,10 @@ public:
     // splines
     Spline2D spline;
     Bezier2D bezier;
+
+    // simulation
+    FemPoisson fem;
+    FemEikonal fem_eikonal;
 
 public slots:
     void print();

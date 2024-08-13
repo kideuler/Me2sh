@@ -196,6 +196,67 @@ void MainWindow::makeBezier(){
     drawMeshArea->showBezier();
 }
 
+void MainWindow::solvePoisson(){
+    drawMeshArea->fem.reset();
+    std::chrono::time_point<std::chrono::system_clock> start, end;
+    start = std::chrono::system_clock::now();
+    drawMeshArea->mesh.compute_boundary_nodes();
+    drawMeshArea->fem.init(drawMeshArea->mesh, 0.0, 1.0, 1.0);
+    end = std::chrono::system_clock::now();
+    std::chrono::duration<double> elapsed_seconds = end-start;
+    msgBox->addMessage(QString::fromStdString("Initialized Laplace Equation: " + std::to_string(elapsed_seconds.count()) + " seconds"));
+
+
+    start = std::chrono::system_clock::now();
+    drawMeshArea->fem.assemble();
+    drawMeshArea->fem.apply_dbc();
+    end = std::chrono::system_clock::now();
+    elapsed_seconds = end-start;
+    msgBox->addMessage(QString::fromStdString("Assembled Laplace Equation: " + std::to_string(elapsed_seconds.count()) + " seconds"));
+
+    start = std::chrono::system_clock::now();
+    drawMeshArea->fem.solve();
+    end = std::chrono::system_clock::now();
+    elapsed_seconds = end-start;
+    msgBox->addMessage(QString::fromStdString("Solved Laplace Equation: " + std::to_string(elapsed_seconds.count()) + " seconds"));
+
+    drawMeshArea->showPoisson();
+}
+
+void MainWindow::solveEikonal(){
+
+    bool ok;
+    double alpha = QInputDialog::getDouble(this, tr("DrawMesh"),
+                                        tr("Select alpha value for Eikonal Equation\n|\\grad(u)|^2= 1, using \nalpha^2 \\laplacian(v)-v = 0 \nu = -alpha*log(v):"),
+                                        0.001,
+                                        0, 1, 5, &ok);
+    if (ok){
+        drawMeshArea->fem_eikonal.reset();
+        std::chrono::time_point<std::chrono::system_clock> start, end;
+        start = std::chrono::system_clock::now();
+        drawMeshArea->mesh.compute_boundary_nodes();
+        drawMeshArea->fem_eikonal.init(drawMeshArea->mesh, alpha);
+        end = std::chrono::system_clock::now();
+        std::chrono::duration<double> elapsed_seconds = end-start;
+        msgBox->addMessage(QString::fromStdString("Initialized Eikonal Equation: " + std::to_string(elapsed_seconds.count()) + " seconds"));
+
+        start = std::chrono::system_clock::now();
+        drawMeshArea->fem_eikonal.assemble();
+        drawMeshArea->fem_eikonal.apply_dbc();
+        end = std::chrono::system_clock::now();
+        elapsed_seconds = end-start;
+        msgBox->addMessage(QString::fromStdString("Assembled Eikonal Equation: " + std::to_string(elapsed_seconds.count()) + " seconds"));
+
+        start = std::chrono::system_clock::now();
+        drawMeshArea->fem_eikonal.solve();
+        end = std::chrono::system_clock::now();
+        elapsed_seconds = end-start;
+        msgBox->addMessage(QString::fromStdString("Solved Eikonal Equation: " + std::to_string(elapsed_seconds.count()) + " seconds"));
+
+        drawMeshArea->showEikonal();
+    }
+}
+
 void MainWindow::createActions()
 {
     penColorAct = new QAction(tr("&Pen Color..."), this);
@@ -250,6 +311,15 @@ void MainWindow::createActions()
     makeBezierAct = new QAction(tr("&Make Bezier Spline"), this);
     makeBezierAct->setShortcut(tr("Ctrl+2"));
     connect(makeBezierAct, &QAction::triggered, this, &MainWindow::makeBezier);
+
+    // simulation actions
+    solvePoissonAct = new QAction(tr("&Solve Laplace Equation"), this);
+    solvePoissonAct->setShortcut(tr("Ctrl+Shift+1"));
+    connect(solvePoissonAct, &QAction::triggered, this, &MainWindow::solvePoisson);
+
+    solveEikonalAct = new QAction(tr("&Solve Eikonal Equation"), this);
+    solveEikonalAct->setShortcut(tr("Ctrl+Shift+2"));
+    connect(solveEikonalAct, &QAction::triggered, this, &MainWindow::solveEikonal);
 }
 
 void MainWindow::createMenus()
@@ -283,10 +353,16 @@ void MainWindow::createMenus()
     splineMenu = new QMenu(tr("&Spline"), this);
     splineMenu->addAction(makeSplineAct);
     splineMenu->addAction(makeBezierAct);
+
+    // simulation menu
+    simMenu = new QMenu(tr("&Simulation"), this);
+    simMenu->addAction(solvePoissonAct);
+    simMenu->addAction(solveEikonalAct);
     
 
     menuBar()->addMenu(optionMenu);
     menuBar()->addMenu(helpMenu);
     menuBar()->addMenu(meshMenu);
     menuBar()->addMenu(splineMenu);
+    menuBar()->addMenu(simMenu);
 }
