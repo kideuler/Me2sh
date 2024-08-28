@@ -194,12 +194,18 @@ void FemEikonal::assemble(){
             for (int jj = 0; jj<nnodes; jj++){
                 if (!msh.nodes_on_boundary[msh.elems(ii,jj)]){
 
+                    double v = 0.0;
+                    for (int n = 0; n<nnodes; n++){
+                        v += phi[nq*q+n]*1.0;
+                    }
+                    b(msh.elems(ii,jj)) += v*ws[q]*detJ*phi[nq*q+jj];
+
                     // inserting into stiffness matrix
                     for (int kk = 0; kk<nnodes; kk++){
                         for (int dim = 0; dim<2; dim++){
-                            A.coeffRef(msh.elems(ii,jj), msh.elems(ii,kk)) += alpha*alpha*ws[q]*detJ*grad_sol[2*kk+dim]*grad_sol[2*jj+dim];
+                            A.coeffRef(msh.elems(ii,jj), msh.elems(ii,kk)) += 1*ws[q]*detJ*grad_sol[2*kk+dim]*grad_sol[2*jj+dim];
                         }
-                        A.coeffRef(msh.elems(ii,jj), msh.elems(ii,kk)) += ws[q]*detJ*phi[nq*q+jj]*phi[nq*q+kk];
+                        //A.coeffRef(msh.elems(ii,jj), msh.elems(ii,kk)) += -alpha*alpha*ws[q]*detJ*phi[nq*q+jj]*phi[nq*q+kk];
                     }
                 }
             }
@@ -212,7 +218,7 @@ void FemEikonal::apply_dbc(){
     for (int n = 0; n<msh.coords.nrows(); n++){
         if (msh.nodes_on_boundary[n]){
             A.coeffRef(n,n) = 1.0;
-            b(n) = 1.0;
+            b(n) = 0.0;
         }
     }
 }
@@ -221,17 +227,19 @@ void FemEikonal::solve(){
     // setting up matrix and rhs vector
 
     A.makeCompressed();
-    Eigen::SparseLU<Eigen::SparseMatrix<double>, Eigen::COLAMDOrdering<int> > solver;
-    solver.analyzePattern(A);
-    solver.factorize(A); 
+    Eigen::BiCGSTAB<Eigen::SparseMatrix<double> > solver;
+    solver.compute(A);
+    sol = solver.solve(b); 
     if (solver.info() == Eigen::Success){
-        sol = solver.solve(b); 
+        
+        std::cout << "#iterations:     " << solver.iterations() << std::endl;
+        std::cout << "estimated error: " << solver.error()      << std::endl;
     } else {
         std::cout << "Eigen failed to solve" << std::endl;
     }
 
     for (int n = 0; n<msh.coords.nrows(); n++){
-        u[n] = -alpha*log(sol(n));
+        u[n] = sol(n);
     }
 
 

@@ -93,6 +93,7 @@ class FemEikonal {
 
         // public solution
         std::vector<double> u;
+        Eigen::VectorXd sol;
 
         void init(Mesh2D &msh, double alpha){
             this->msh = msh;
@@ -118,7 +119,7 @@ class FemEikonal {
         double alpha;
         Eigen::SparseMatrix<double> A;
         Eigen::VectorXd b;
-        Eigen::VectorXd sol;
+        
     
 };
 

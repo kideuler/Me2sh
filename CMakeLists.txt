@@ -10,7 +10,7 @@ include(CTest)
 set(CMAKE_OSX_ARCHITECTURES "arm64")
 
 include_directories(
-    ${CMAKE_CURRENT_SOURCE_DIR}/Trimesh #triangular mesh generation
+    ${CMAKE_CURRENT_SOURCE_DIR}/Meshing #triangular mesh generation
     ${CMAKE_CURRENT_SOURCE_DIR}/gui #gui using qt
     ${CMAKE_CURRENT_SOURCE_DIR}/Splines #splines for geometry
     ${CMAKE_CURRENT_SOURCE_DIR}/simulation #FEM for simulation
@@ -18,15 +18,15 @@ include_directories(
 
 # trimesh library
 add_library(Trimesh 
-    ${CMAKE_CURRENT_SOURCE_DIR}/Trimesh/GeoMesh_Linalg.c
-    ${CMAKE_CURRENT_SOURCE_DIR}/Trimesh/GeoMesh2d.c
-    ${CMAKE_CURRENT_SOURCE_DIR}/Trimesh/GeoMeshPartition.c
-    ${CMAKE_CURRENT_SOURCE_DIR}/Trimesh/GeoMeshSmooth.c
-    ${CMAKE_CURRENT_SOURCE_DIR}/Trimesh/kdTree.c
-    ${CMAKE_CURRENT_SOURCE_DIR}/Trimesh/Matrix.c
-    ${CMAKE_CURRENT_SOURCE_DIR}/Trimesh/GeoMesh.h
-    ${CMAKE_CURRENT_SOURCE_DIR}/Trimesh/Trimesh.cpp
-    ${CMAKE_CURRENT_SOURCE_DIR}/Trimesh/Trimesh.hpp
+    ${CMAKE_CURRENT_SOURCE_DIR}/Meshing/GeoMesh_Linalg.c
+    ${CMAKE_CURRENT_SOURCE_DIR}/Meshing/GeoMesh2d.c
+    ${CMAKE_CURRENT_SOURCE_DIR}/Meshing/GeoMeshPartition.c
+    ${CMAKE_CURRENT_SOURCE_DIR}/Meshing/GeoMeshSmooth.c
+    ${CMAKE_CURRENT_SOURCE_DIR}/Meshing/kdTree.c
+    ${CMAKE_CURRENT_SOURCE_DIR}/Meshing/Matrix.c
+    ${CMAKE_CURRENT_SOURCE_DIR}/Meshing/GeoMesh.h
+    ${CMAKE_CURRENT_SOURCE_DIR}/Meshing/Trimesh.cpp
+    ${CMAKE_CURRENT_SOURCE_DIR}/Meshing/Trimesh.hpp
     )
 
 
@@ -44,6 +44,8 @@ target_link_libraries(Splines Eigen3::Eigen)
 add_library(Sim
     ${CMAKE_CURRENT_SOURCE_DIR}/Simulation/Fem.hpp
     ${CMAKE_CURRENT_SOURCE_DIR}/Simulation/Fem.cpp
+    ${CMAKE_CURRENT_SOURCE_DIR}/Simulation/Stokes.hpp
+    ${CMAKE_CURRENT_SOURCE_DIR}/Simulation/Stokes.cpp
 )
 target_link_libraries(Sim Eigen3::Eigen Trimesh)
 
@@ -97,8 +99,20 @@ target_link_libraries(BeziermeshTest PRIVATE Splines Trimesh)
 add_test(NAME BeziermeshTest
          COMMAND BeziermeshTest)
 
-# adding tests for Bezier library
+# adding tests for Poisson library
 add_executable(PoissonTest ${CMAKE_CURRENT_SOURCE_DIR}/Tests/PoissonTest.cpp)
 target_link_libraries(PoissonTest PRIVATE Sim)
 add_test(NAME PoissonTest
          COMMAND PoissonTest)
+         
+# adding tests for Eikonal library
+add_executable(EikonalTest ${CMAKE_CURRENT_SOURCE_DIR}/Tests/EikonalTest.cpp)
+target_link_libraries(EikonalTest PRIVATE Sim)
+add_test(NAME EikonalTest
+         COMMAND EikonalTest)
+
+# adding tests for Stokes library
+add_executable(StokesTest ${CMAKE_CURRENT_SOURCE_DIR}/Tests/StokesTest.cpp)
+target_link_libraries(StokesTest PRIVATE Sim)
+add_test(NAME StokesTest
+         COMMAND StokesTest)
