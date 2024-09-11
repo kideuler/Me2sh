@@ -7,6 +7,8 @@ project(
 
 include(CTest)
 
+set(CMAKE_CXX_STANDARD 17)
+
 set(CMAKE_OSX_ARCHITECTURES "arm64")
 
 include_directories(
@@ -27,6 +29,9 @@ add_library(Trimesh
     ${CMAKE_CURRENT_SOURCE_DIR}/Meshing/GeoMesh.h
     ${CMAKE_CURRENT_SOURCE_DIR}/Meshing/Trimesh.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/Meshing/Trimesh.hpp
+    ${CMAKE_CURRENT_SOURCE_DIR}/Meshing/Primitives.hpp
+    ${CMAKE_CURRENT_SOURCE_DIR}/Meshing/Primitives.cpp
+    ${CMAKE_CURRENT_SOURCE_DIR}/Meshing/Graph.hpp
     )
 
 
@@ -105,14 +110,8 @@ target_link_libraries(PoissonTest PRIVATE Sim)
 add_test(NAME PoissonTest
          COMMAND PoissonTest)
          
-# adding tests for Eikonal library
-add_executable(EikonalTest ${CMAKE_CURRENT_SOURCE_DIR}/Tests/EikonalTest.cpp)
-target_link_libraries(EikonalTest PRIVATE Sim)
-add_test(NAME EikonalTest
-         COMMAND EikonalTest)
-
-# adding tests for Stokes library
-add_executable(StokesTest ${CMAKE_CURRENT_SOURCE_DIR}/Tests/StokesTest.cpp)
-target_link_libraries(StokesTest PRIVATE Sim)
-add_test(NAME StokesTest
-         COMMAND StokesTest)
+# adding tests for Primitives library
+add_executable(PrimitiveTest ${CMAKE_CURRENT_SOURCE_DIR}/Tests/PrimitiveTest.cpp)
+target_link_libraries(PrimitiveTest PRIVATE Sim)
+add_test(NAME PrimitiveTest
+         COMMAND PrimitiveTest)
