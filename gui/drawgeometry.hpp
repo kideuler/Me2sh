@@ -1,58 +1,30 @@
-#ifndef DRAWMESH_H
-#define DRAWMESH_H
+#ifndef DRAWGEOMETRY_H
+#define DRAWGEOMETRY_H
 
 #include <QColor>
 #include <QImage>
 #include <QPoint>
 #include <QWidget>
 
-#include "TriMesh.hpp"
-#include "Spline.hpp"
-#include "Bezier.hpp"
-#include "Fem.hpp"
-
-class DrawMeshArea : public QWidget
+class DrawGeoArea : public QWidget
 {
     Q_OBJECT
 
 public:
-    DrawMeshArea(QWidget *parent = nullptr);
+    DrawGeoArea(QWidget *parent = nullptr);
     void clearImage();
 
     void setPenColor(const QColor &newColor);
     void setPenWidth(int newWidth);
 
-    // drawing mesh
-    void showMesh();
-    void showSpline();
-    void showBezier();
-    void showQuality();
-    void showPoisson();
-    void showEikonal();
-
     bool isModified() const { return modified; }
     QColor penColor() const { return myPenColor; }
     int penWidth() const { return myPenWidth; }
 
-
-    // trimesh arrays
-    Matrix<double> coords;
-    Matrix<double> Cpoints;
-    Matrix<int> segments;
-    Mesh2D mesh;
     double h_target = 0.02;
     int max_smoothing_iters = 100;
 
-    // splines
-    Spline2D spline;
-    Bezier2D bezier;
-
-    // simulation
-    FemPoisson fem;
-    FemEikonal fem_eikonal;
-
 public slots:
-    void print();
 
 protected:
     void mousePressEvent(QMouseEvent *event) override;

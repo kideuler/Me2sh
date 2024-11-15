@@ -10,31 +10,73 @@
 #include <QCloseEvent>
 #include <QSplitter>
 #include <QSettings>
+#include <QTabWidget>
+#include <QStackedWidget>
+#include <QVBoxLayout>
+#include <QLabel>
 #include <chrono>
 
 MainWindow::MainWindow(QWidget *parent)
-    : QMainWindow(parent), drawMeshArea(new DrawMeshArea(this))
+    : QMainWindow(parent), drawGeoArea(new DrawGeoArea(this))
 {   
-    drawMeshArea->coords.cols = 2;
-    drawMeshArea->segments.cols = 2;
-    drawMeshArea->Cpoints.cols = 2;
+    tabWidget = new QTabWidget(this);
+    tabWidget->addTab(drawGeoArea, tr("Geometry"));
+    tabWidget->addTab(new QWidget(), tr("Mesh"));
+    tabWidget->addTab(new QWidget(), tr("Simulation"));
 
-    setCentralWidget(drawMeshArea);
     msgBox = new ConsoleOutput(this);
 
     QSettings settings;
     int height = settings.value("Split", 600).toInt();
     QSplitter *centralWidget = new QSplitter(Qt::Vertical, this);
-    centralWidget->addWidget(drawMeshArea);
+    centralWidget->addWidget(tabWidget);
     centralWidget->addWidget(msgBox);
     centralWidget->setSizes(QList<int>{height, 800-height});
 
     setCentralWidget(centralWidget);
     createActions();
     createMenus();
+    createSidebars();
 
     setWindowTitle(tr("Me2sh"));
-    resize(1000, 800);
+    resize(1600, 800);
+
+    connect(tabWidget, &QTabWidget::currentChanged, this, &MainWindow::updateSidebar);
+}
+
+void MainWindow::createSidebars()
+{
+    sidebarStack = new QStackedWidget(this);
+
+    geometrySidebar = new QWidget(this);
+    meshSidebar = new QWidget(this);
+    simulationSidebar = new QWidget(this);
+
+    // Add widgets to sidebars as needed
+    geometrySidebar->setLayout(new QVBoxLayout);
+    geometrySidebar->layout()->addWidget(new QLabel("Geometry Sidebar"));
+
+    meshSidebar->setLayout(new QVBoxLayout);
+    meshSidebar->layout()->addWidget(new QLabel("Mesh Sidebar"));
+
+    simulationSidebar->setLayout(new QVBoxLayout);
+    simulationSidebar->layout()->addWidget(new QLabel("Simulation Sidebar"));
+
+    sidebarStack->addWidget(geometrySidebar);
+    sidebarStack->addWidget(meshSidebar);
+    sidebarStack->addWidget(simulationSidebar);
+
+    // Update layout to include sidebarStack
+    QSplitter *mainSplitter = new QSplitter(Qt::Horizontal, this);
+    mainSplitter->addWidget(sidebarStack);
+    mainSplitter->addWidget(centralWidget());
+    mainSplitter->setSizes(QList<int>{100, width()-100});
+    setCentralWidget(mainSplitter);
+}
+
+void MainWindow::updateSidebar(int index)
+{
+    sidebarStack->setCurrentIndex(index);
 }
 
 void MainWindow::closeEvent(QCloseEvent *event)
@@ -44,221 +86,37 @@ void MainWindow::closeEvent(QCloseEvent *event)
 
 void MainWindow::penColor()
 {
-    QColor newColor = QColorDialog::getColor(drawMeshArea->penColor());
+    QColor newColor = QColorDialog::getColor(drawGeoArea->penColor());
     if (newColor.isValid())
-        drawMeshArea->setPenColor(newColor);
+        drawGeoArea->setPenColor(newColor);
 }
 
 void MainWindow::penWidth()
 {
     bool ok;
-    int newWidth = QInputDialog::getInt(this, tr("DrawMesh"),
+    int newWidth = QInputDialog::getInt(this, tr("me2sh"),
                                         tr("Select pen width:"),
-                                        drawMeshArea->penWidth(),
+                                        drawGeoArea->penWidth(),
                                         1, 50, 1, &ok);
     if (ok)
-        drawMeshArea->setPenWidth(newWidth);
+        drawGeoArea->setPenWidth(newWidth);
 }
 
 void MainWindow::about()
 {
     QMessageBox::about(this, tr("About Me2sh"),
-            tr("<p>The <b>DrawMesh</b> example shows how to use QMainWindow as the "
-               "base widget for an application, and how to reimplement some of "
-               "QWidget's event handlers to receive the events generated for "
-               "the application's widgets:</p><p> We reimplement the mouse event "
-               "handlers to facilitate drawing, the paint event handler to "
-               "update the application and the resize event handler to optimize "
-               "the application's appearance. In addition we reimplement the "
-               "close event handler to intercept the close events before "
-               "terminating the application.</p><p> The example also demonstrates "
-               "how to use QPainter to draw an image in real time, as well as "
-               "to repaint widgets.</p>"));
+            tr("Write Something better Later"));
 }
 
 void MainWindow::clearScreen(){
-    drawMeshArea->clearImage();
+    drawGeoArea->clearImage();
     msgBox->clear();
-}
-
-void MainWindow::sethtarget(){
-    bool ok;
-    double h_target = QInputDialog::getDouble(this, tr("DrawMesh"),
-                                        tr("Select target h value:"),
-                                        drawMeshArea->h_target,
-                                        0, 1, 4, &ok);
-    if (ok)
-        drawMeshArea->h_target = h_target;
-}
-
-void MainWindow::setsmoothingiters(){
-    bool ok;
-    int iters = QInputDialog::getInt(this, tr("DrawMesh"),
-                                        tr("Choose Maximum number of smoothing iterations:"),
-                                        drawMeshArea->max_smoothing_iters,
-                                        1, 1000, 1, &ok);
-    if (ok)
-        drawMeshArea->max_smoothing_iters = iters;
-}
-
-void MainWindow::triangulate(){
-    std::chrono::time_point<std::chrono::system_clock> start, end;
-    start = std::chrono::system_clock::now();
-    if (drawMeshArea->coords.nrows() > 0){
-        drawMeshArea->mesh.Triangulate(drawMeshArea->coords);
-        drawMeshArea->showMesh();
-    } else if (drawMeshArea->spline.npoints() > 0){
-        drawMeshArea->spline.create_segments(drawMeshArea->h_target, drawMeshArea->coords, drawMeshArea->segments);
-        drawMeshArea->mesh.Triangulate(drawMeshArea->coords);
-        drawMeshArea->showMesh();
-    } else if (drawMeshArea->bezier.npoints() > 0){
-        drawMeshArea->bezier.create_segments(drawMeshArea->h_target, drawMeshArea->coords, drawMeshArea->segments);
-        drawMeshArea->mesh.Triangulate(drawMeshArea->coords);
-        drawMeshArea->showMesh();
-    }
-    end = std::chrono::system_clock::now();
-    std::chrono::duration<double> elapsed_seconds = end-start;
-    msgBox->addMessage(QString::fromStdString("Triangulation time: " + std::to_string(elapsed_seconds.count()) + " seconds"));
-    
-}
-
-void MainWindow::constrainedTriangulate(){
-    std::chrono::time_point<std::chrono::system_clock> start, end;
-    start = std::chrono::system_clock::now();
-    if (drawMeshArea->coords.nrows() > 0){
-        drawMeshArea->mesh.Triangulate(drawMeshArea->coords, drawMeshArea->segments);
-        drawMeshArea->showMesh();
-    } else if (drawMeshArea->spline.npoints() > 0){
-        drawMeshArea->spline.create_segments(drawMeshArea->h_target, drawMeshArea->coords, drawMeshArea->segments);
-        drawMeshArea->mesh.Triangulate(drawMeshArea->coords, drawMeshArea->segments);
-        drawMeshArea->showMesh();
-    } else if (drawMeshArea->bezier.npoints() > 0){
-        drawMeshArea->bezier.create_segments(drawMeshArea->h_target, drawMeshArea->coords, drawMeshArea->segments);
-        drawMeshArea->mesh.Triangulate(drawMeshArea->coords, drawMeshArea->segments);
-        drawMeshArea->showMesh();
-    }
-    end = std::chrono::system_clock::now();
-    std::chrono::duration<double> elapsed_seconds = end-start;
-    msgBox->addMessage(QString::fromStdString("Constrained Triangulation time: " + std::to_string(elapsed_seconds.count()) + " seconds"));
-}
-
-void MainWindow::refineMesh(){
-    std::chrono::time_point<std::chrono::system_clock> start, end;
-    start = std::chrono::system_clock::now();
-    drawMeshArea->mesh.Refine(drawMeshArea->h_target);
-    end = std::chrono::system_clock::now();
-    std::chrono::duration<double> elapsed_seconds = end-start;
-    msgBox->addMessage(QString::fromStdString("Mesh Refinement time: " + std::to_string(elapsed_seconds.count()) + " seconds"));
-    drawMeshArea->showMesh();
-}
-
-void MainWindow::smoothMesh(){
-    std::chrono::time_point<std::chrono::system_clock> start, end;
-    start = std::chrono::system_clock::now();
-    drawMeshArea->mesh.Smooth(drawMeshArea->max_smoothing_iters);
-    end = std::chrono::system_clock::now();
-    std::chrono::duration<double> elapsed_seconds = end-start;
-    msgBox->addMessage(QString::fromStdString("Mesh Smoothing time: " + std::to_string(elapsed_seconds.count()) + " seconds"));
-    drawMeshArea->showMesh();
-}
-
-void MainWindow::computeVolumeLengthMetric(){
-    std::chrono::time_point<std::chrono::system_clock> start, end;
-    start = std::chrono::system_clock::now();
-    drawMeshArea->mesh.Compute_volume_length_metric();
-    end = std::chrono::system_clock::now();
-    std::chrono::duration<double> elapsed_seconds = end-start;
-    msgBox->addMessage(QString::fromStdString("Compute Mesh Quality: " + std::to_string(elapsed_seconds.count()) + " seconds"));
-    drawMeshArea->showQuality();
-}
-
-void MainWindow::makeSpline(){
-    drawMeshArea->bezier.reset();
-    drawMeshArea->spline.reset();
-    std::chrono::time_point<std::chrono::system_clock> start, end;
-    start = std::chrono::system_clock::now();
-    drawMeshArea->spline.init(drawMeshArea->Cpoints);
-    end = std::chrono::system_clock::now();
-    std::chrono::duration<double> elapsed_seconds = end-start;
-    msgBox->addMessage(QString::fromStdString("Computed Spline: " + std::to_string(elapsed_seconds.count()) + " seconds"));
-    drawMeshArea->showSpline();
-}
-
-void MainWindow::makeBezier(){
-    drawMeshArea->bezier.reset();
-    drawMeshArea->spline.reset();
-    std::chrono::time_point<std::chrono::system_clock> start, end;
-    start = std::chrono::system_clock::now();
-    drawMeshArea->bezier.init(drawMeshArea->Cpoints);
-    end = std::chrono::system_clock::now();
-    std::chrono::duration<double> elapsed_seconds = end-start;
-    msgBox->addMessage(QString::fromStdString("Computed Bezier: " + std::to_string(elapsed_seconds.count()) + " seconds"));
-    drawMeshArea->showBezier();
-}
-
-void MainWindow::solvePoisson(){
-    drawMeshArea->fem.reset();
-    std::chrono::time_point<std::chrono::system_clock> start, end;
-    start = std::chrono::system_clock::now();
-    drawMeshArea->mesh.compute_boundary_nodes();
-    drawMeshArea->fem.init(drawMeshArea->mesh, 0.0, 1.0, 1.0);
-    end = std::chrono::system_clock::now();
-    std::chrono::duration<double> elapsed_seconds = end-start;
-    msgBox->addMessage(QString::fromStdString("Initialized Laplace Equation: " + std::to_string(elapsed_seconds.count()) + " seconds"));
-
-
-    start = std::chrono::system_clock::now();
-    drawMeshArea->fem.assemble();
-    drawMeshArea->fem.apply_dbc();
-    end = std::chrono::system_clock::now();
-    elapsed_seconds = end-start;
-    msgBox->addMessage(QString::fromStdString("Assembled Laplace Equation: " + std::to_string(elapsed_seconds.count()) + " seconds"));
-
-    start = std::chrono::system_clock::now();
-    drawMeshArea->fem.solve();
-    end = std::chrono::system_clock::now();
-    elapsed_seconds = end-start;
-    msgBox->addMessage(QString::fromStdString("Solved Laplace Equation: " + std::to_string(elapsed_seconds.count()) + " seconds"));
-
-    drawMeshArea->showPoisson();
-}
-
-void MainWindow::solveEikonal(){
-
-    bool ok;
-    double alpha = QInputDialog::getDouble(this, tr("DrawMesh"),
-                                        tr("Select alpha value for Eikonal Equation\n|\\grad(u)|^2= 1, using \nalpha^2 \\laplacian(v)-v = 0 \nu = -alpha*log(v):"),
-                                        0.001,
-                                        0, 1, 5, &ok);
-    if (ok){
-        drawMeshArea->fem_eikonal.reset();
-        std::chrono::time_point<std::chrono::system_clock> start, end;
-        start = std::chrono::system_clock::now();
-        drawMeshArea->mesh.compute_boundary_nodes();
-        drawMeshArea->fem_eikonal.init(drawMeshArea->mesh, alpha);
-        end = std::chrono::system_clock::now();
-        std::chrono::duration<double> elapsed_seconds = end-start;
-        msgBox->addMessage(QString::fromStdString("Initialized Eikonal Equation: " + std::to_string(elapsed_seconds.count()) + " seconds"));
-
-        start = std::chrono::system_clock::now();
-        drawMeshArea->fem_eikonal.assemble();
-        drawMeshArea->fem_eikonal.apply_dbc();
-        end = std::chrono::system_clock::now();
-        elapsed_seconds = end-start;
-        msgBox->addMessage(QString::fromStdString("Assembled Eikonal Equation: " + std::to_string(elapsed_seconds.count()) + " seconds"));
-
-        start = std::chrono::system_clock::now();
-        drawMeshArea->fem_eikonal.solve();
-        end = std::chrono::system_clock::now();
-        elapsed_seconds = end-start;
-        msgBox->addMessage(QString::fromStdString("Solved Eikonal Equation: " + std::to_string(elapsed_seconds.count()) + " seconds"));
-
-        drawMeshArea->showEikonal();
-    }
 }
 
 void MainWindow::createActions()
 {
+    connect(tabWidget, &QTabWidget::currentChanged, this, &MainWindow::updateSidebar);
+
     penColorAct = new QAction(tr("&Pen Color..."), this);
     connect(penColorAct, &QAction::triggered, this, &MainWindow::penColor);
 
@@ -276,50 +134,6 @@ void MainWindow::createActions()
     aboutQtAct = new QAction(tr("About &Qt"), this);
     connect(aboutQtAct, &QAction::triggered, qApp, &QApplication::aboutQt);
 
-    // mesh actions
-    sethtargetAct = new QAction(tr("&Set h target"), this);
-    connect(sethtargetAct, &QAction::triggered, this, &MainWindow::sethtarget);
-
-    setsmoothingitersAct = new QAction(tr("&Set Max Smoothing Iterations"), this);
-    connect(setsmoothingitersAct, &QAction::triggered, this, &MainWindow::setsmoothingiters);
-
-    triangulateAct = new QAction(tr("&Triangulate"), this);
-    triangulateAct->setShortcut(tr("Ctrl+T"));
-    connect(triangulateAct, &QAction::triggered, this, &MainWindow::triangulate);
-
-    constrainedTriangulateAct = new QAction(tr("&Constrained Triangulation"), this);
-    constrainedTriangulateAct->setShortcut(tr("Ctrl+Shift+T"));
-    connect(constrainedTriangulateAct, &QAction::triggered, this, &MainWindow::constrainedTriangulate);
-
-    refineMeshAct = new QAction(tr("&Refine Mesh"), this);
-    refineMeshAct->setShortcut(tr("Ctrl+R"));
-    connect(refineMeshAct, &QAction::triggered, this, &MainWindow::refineMesh);
-
-    smoothMeshAct = new QAction(tr("&Smooth Mesh"), this);
-    smoothMeshAct->setShortcut(tr("Ctrl+S"));
-    connect(smoothMeshAct, &QAction::triggered, this, &MainWindow::smoothMesh);
-
-    ComputeVolumeLengthMetricAct = new QAction(tr("&Compute Volume Length Metric"), this);
-    ComputeVolumeLengthMetricAct->setShortcut(tr("Ctrl+A"));
-    connect(ComputeVolumeLengthMetricAct, &QAction::triggered, this, &MainWindow::computeVolumeLengthMetric);
-
-    // spline actions
-    makeSplineAct = new QAction(tr("&Make Cubic Spline"), this);
-    makeSplineAct->setShortcut(tr("Ctrl+1"));
-    connect(makeSplineAct, &QAction::triggered, this, &MainWindow::makeSpline);
-
-    makeBezierAct = new QAction(tr("&Make Bezier Spline"), this);
-    makeBezierAct->setShortcut(tr("Ctrl+2"));
-    connect(makeBezierAct, &QAction::triggered, this, &MainWindow::makeBezier);
-
-    // simulation actions
-    solvePoissonAct = new QAction(tr("&Solve Laplace Equation"), this);
-    solvePoissonAct->setShortcut(tr("Ctrl+Shift+1"));
-    connect(solvePoissonAct, &QAction::triggered, this, &MainWindow::solvePoisson);
-
-    solveEikonalAct = new QAction(tr("&Solve Eikonal Equation"), this);
-    solveEikonalAct->setShortcut(tr("Ctrl+Shift+2"));
-    connect(solveEikonalAct, &QAction::triggered, this, &MainWindow::solveEikonal);
 }
 
 void MainWindow::createMenus()
@@ -336,33 +150,7 @@ void MainWindow::createMenus()
     helpMenu->addAction(aboutAct);
     helpMenu->addAction(aboutQtAct);
 
-    // mesh menu
-    meshMenu = new QMenu(tr("&Mesh"), this);
-    meshMenu->addAction(sethtargetAct);
-    meshMenu->addAction(setsmoothingitersAct);
-    meshMenu->addSeparator();
-    meshMenu->addAction(triangulateAct);
-    meshMenu->addAction(constrainedTriangulateAct);
-    meshMenu->addSeparator();
-    meshMenu->addAction(refineMeshAct);
-    meshMenu->addAction(smoothMeshAct);
-    meshMenu->addSeparator();
-    meshMenu->addAction(ComputeVolumeLengthMetricAct);
-
-    // spline menu
-    splineMenu = new QMenu(tr("&Spline"), this);
-    splineMenu->addAction(makeSplineAct);
-    splineMenu->addAction(makeBezierAct);
-
-    // simulation menu
-    simMenu = new QMenu(tr("&Simulation"), this);
-    simMenu->addAction(solvePoissonAct);
-    simMenu->addAction(solveEikonalAct);
-    
 
     menuBar()->addMenu(optionMenu);
     menuBar()->addMenu(helpMenu);
-    menuBar()->addMenu(meshMenu);
-    menuBar()->addMenu(splineMenu);
-    menuBar()->addMenu(simMenu);
 }
