@@ -36,14 +36,20 @@ qt_standard_project_setup()
 # Glob all gui files together
 file( GLOB GUI_SRCS ${CMAKE_CURRENT_SOURCE_DIR}/gui/*.cpp ${CMAKE_CURRENT_SOURCE_DIR}/gui/*.hpp )
 
+set_source_files_properties(${CMAKE_CURRENT_SOURCE_DIR}/resources/appicon.icns PROPERTIES MACOSX_PACKAGE_LOCATION "Resources")
+
+# Add the executable
 qt_add_executable(me2sh
     ${GUI_SRCS}
+    ${CMAKE_CURRENT_SOURCE_DIR}/resources/appicon.icns
 )
 
 set_target_properties(me2sh PROPERTIES
     WIN32_EXECUTABLE TRUE
     MACOSX_BUNDLE TRUE
+    MACOSX_BUNDLE_ICON_FILE appicon.icns
 )
+
 
 target_include_directories(me2sh PUBLIC
     ${CMAKE_CURRENT_SOURCE_DIR}/geom

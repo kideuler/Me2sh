@@ -20,10 +20,14 @@ DrawGeoArea::DrawGeoArea(Me2sh_Geometry *geometry, QWidget *parent)
     setAttribute(Qt::WA_StaticContents);
     setMouseTracking(true);
     setAttribute(Qt::WA_Hover);
+    // Initialize images with the correct size
     image = QImage(size(), QImage::Format_RGB32);
-    image.fill(qRgb(255, 255, 255));
+    image.fill(qRgb(255, 255, 255)); // Ensure the background is white
+
     tempImage = QImage(size(), QImage::Format_ARGB32_Premultiplied);
-    tempImage.fill(Qt::transparent);
+    tempImage.fill(Qt::transparent); // Ensure the temporary image is transparent
+
+    update();
 }
 
 void DrawGeoArea::setPenColor(const QColor &newColor)
@@ -40,6 +44,7 @@ void DrawGeoArea::clearImage()
 {
     tempImage.fill(Qt::transparent);
     image.fill(qRgb(255, 255, 255));
+    clearTemporaryLayer();
     modified = true;
     geo->clear();
     update();

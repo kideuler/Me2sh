@@ -37,6 +37,9 @@ public:
     // Constructor
     MainWindow(QWidget *parent = nullptr);
 
+    // clear screen
+    void clearScreen();
+
 protected:
     // Event handler for close event
     void closeEvent(QCloseEvent *event) override;
@@ -53,9 +56,6 @@ private slots:
 
     // Slot for about
     void about();
-
-    // Slot for clear screen
-    void clearScreen();
 
     // Handle tab change
     void handleTabChange(int index);

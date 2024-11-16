@@ -155,3 +155,29 @@ void DrawMeshArea::drawgeometry(){
         drawShape();
     }
 }
+
+void DrawMeshArea::chanegeMeshSize(){
+    bool ok;
+    double h = QInputDialog::getDouble(this, tr("Input Mesh Size"),
+                                           tr("Mesh Size:"), 0.05, 0, 100, 2, &ok);
+    if (!ok) return;
+    this->h_target = h;
+    gmsh::option::setNumber("Mesh.MeshSizeMin", h_target);
+    gmsh::option::setNumber("Mesh.MeshSizeMax", 1.3*h_target);
+}
+
+void DrawMeshArea::changeElementType(){
+    bool ok;
+    QStringList items;
+    items << tr("Triangles") << tr("Quadrilaterals");
+
+    QString item = QInputDialog::getItem(this, tr("Select Element Type"),
+                                         tr("Element Type:"), items, 0, false, &ok);
+    if (!ok) return;
+
+    if (item == "Triangles") {
+        this->ElementType = 1;
+    } else if (item == "Quadrilaterals") {
+        this->ElementType = 2;
+    }
+}

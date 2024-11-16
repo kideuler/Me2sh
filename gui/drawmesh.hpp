@@ -22,6 +22,9 @@ public:
 
     void drawgeometry();
 
+    void chanegeMeshSize();
+    void changeElementType();
+
 public slots:
 
 protected:
@@ -44,6 +47,11 @@ private:
     bool firstpointinit = false;
     QColor myPenColor = Qt::black; 
     int myPenWidth = 1;
+
+    double h_target = 0.05;
+    int GmshMeshAlgorithm = 6;
+    int GmshRecombinationAlgorithm = 3;
+    bool ElementType = 0;
 };
 
 #endif

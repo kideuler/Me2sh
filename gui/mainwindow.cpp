@@ -136,8 +136,14 @@ void MainWindow::createSidebars()
     QLabel *MeshParamLabel = new QLabel("Mesh Parameters", this);
     meshLayout->addWidget(MeshParamLabel);
 
+    // Add the push buttons right under the label
+    QPushButton *changeMeshSizeButton = new QPushButton(tr("Change Mesh Size"), this);
+    meshLayout->addWidget(changeMeshSizeButton);
+    connect(changeMeshSizeButton, &QPushButton::clicked, drawMeshArea, &DrawMeshArea::chanegeMeshSize);
 
-
+    QPushButton *changeElementTypeButton = new QPushButton(tr("Change Element Type"), this);
+    meshLayout->addWidget(changeElementTypeButton);
+    connect(changeElementTypeButton, &QPushButton::clicked, drawMeshArea, &DrawMeshArea::changeElementType);
 
     meshLayout->addStretch(1);
 

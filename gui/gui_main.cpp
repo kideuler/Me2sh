@@ -13,7 +13,7 @@ int main(int argc, char *argv[])
 
     // Show the main window
     window.show();
-
+    window.clearScreen(); // ensure the screen is clear
     // Run the application
     return app.exec();
 }
