@@ -13,7 +13,7 @@ class DrawGeoArea : public QWidget
     Q_OBJECT
 
 public:
-    DrawGeoArea(QWidget *parent = nullptr);
+    DrawGeoArea(Me2sh_Geometry *geometry, QWidget *parent = nullptr);
     void clearImage();
 
     void setPenColor(const QColor &newColor);
@@ -23,6 +23,7 @@ public:
     void drawBSpline();
     void drawCircle();
     void drawEllipse();
+    void drawRectangle();
 
     #ifdef USE_GEO
     void drawBezier();
@@ -37,6 +38,7 @@ public:
     double h_target = 0.02;
     int max_smoothing_iters = 100;
     bool selectingCenter = false;
+    bool selectingRect = false;
     double rx = 0.0;
     double ry = 0.0;
 
@@ -53,12 +55,15 @@ private:
     void drawPoint(const QPoint &P, QImage *img = nullptr);
     void resizeImage(QImage *image, const QSize &newSize);
     void drawTemporaryCircle(const QPoint &center);
+    void drawTemporarRectangle(const QPoint &center);
     void drawShape();
     void clearTemporaryLayer();
+    void drawAxis(QPainter &painter); // Add this line
+    void drawAxisLabels(QPainter &painter); // Add this line
 
     bool modified = false;
     bool scribbling = false;
-    int myPenWidth = 2;
+    int myPenWidth = 1;
     QColor myPenColor = Qt::blue;
     QImage image;
     void drawLineTo(const QPoint &endPoint, QImage *img = nullptr, QColor PenColor = nullptr);

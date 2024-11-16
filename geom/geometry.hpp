@@ -16,7 +16,7 @@ class Me2sh_Geometry {
         std::vector<std::array<double, 3>> points;
         std::vector<std::array<double, 2>> plot_points;
         std::vector<std::array<int, 2>> segments;
-        std::vector<int> curveLoopTags;
+        std::vector<int> curveTags;
         std::vector<int> planeTags;
         int firstPointIndex = 0;
 
@@ -41,6 +41,7 @@ class Me2sh_Geometry {
         void addBezier(int istart, int iend);
 #endif
         void addEllipse(double x, double y, double rx, double ry);
+        void addRectangle(double x, double y, double lx, double ly);
 
 };
 

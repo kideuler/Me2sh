@@ -24,7 +24,6 @@ find_package(Gmsh REQUIRED)
 
 # geometry library
 file( GLOB GEOMETRY_SRCS ${CMAKE_CURRENT_SOURCE_DIR}/geom/*.cpp ${CMAKE_CURRENT_SOURCE_DIR}/geom/*.hpp )
-# print the files
 add_library(geometry SHARED ${GEOMETRY_SRCS})
 target_include_directories(geometry PUBLIC ${CMAKE_CURRENT_SOURCE_DIR}/geom)
 target_link_libraries(geometry PUBLIC Gmsh::Gmsh)

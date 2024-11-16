@@ -18,7 +18,7 @@
 #include <chrono>
 
 MainWindow::MainWindow(QWidget *parent)
-    : QMainWindow(parent), drawGeoArea(new DrawGeoArea(this))
+    : QMainWindow(parent), geo(new Me2sh_Geometry()), drawGeoArea(new DrawGeoArea(geo,this)), drawMeshArea(new DrawMeshArea(geo, this))
 { 
     screen = QGuiApplication::primaryScreen();
     QRect screenGeometry = screen->geometry();
@@ -27,7 +27,7 @@ MainWindow::MainWindow(QWidget *parent)
 
     tabWidget = new QTabWidget(this);
     tabWidget->addTab(drawGeoArea, tr("Geometry"));
-    tabWidget->addTab(new QWidget(), tr("Mesh"));
+    tabWidget->addTab(drawMeshArea, tr("Mesh"));
     tabWidget->addTab(new QWidget(), tr("Simulation"));
 
     msgBox = new ConsoleOutput(this);
@@ -48,8 +48,16 @@ MainWindow::MainWindow(QWidget *parent)
     resize(1600, 800);
 
     connect(tabWidget, &QTabWidget::currentChanged, this, &MainWindow::updateSidebar);
+    connect(tabWidget, &QTabWidget::currentChanged, this, &MainWindow::handleTabChange);
 
     drawGeoArea->clearImage();
+}
+
+void MainWindow::handleTabChange(int index)
+{
+    if (tabWidget->widget(index) == drawMeshArea) {
+        drawMeshArea->drawgeometry();
+    }
 }
 
 void MainWindow::createSidebars()
@@ -86,6 +94,10 @@ void MainWindow::createSidebars()
     geometryLayout->addWidget(drawEllipseButton);
     connect(drawEllipseButton, &QPushButton::clicked, drawGeoArea, &DrawGeoArea::drawEllipse);
 
+    QPushButton *drawRectangleButton = new QPushButton(tr("Draw Rectangle"), this);
+    geometryLayout->addWidget(drawRectangleButton);
+    connect(drawRectangleButton, &QPushButton::clicked, drawGeoArea, &DrawGeoArea::drawRectangle);
+
     QPushButton *drawSplineButton = new QPushButton(tr("Draw Spline"), this);
     geometryLayout->addWidget(drawSplineButton);
     connect(drawSplineButton, &QPushButton::clicked, drawGeoArea, &DrawGeoArea::drawSpline);
@@ -106,8 +118,28 @@ void MainWindow::createSidebars()
 
 
 
-    meshSidebar->setLayout(new QVBoxLayout);
-    meshSidebar->layout()->addWidget(new QLabel("Mesh Sidebar"));
+    // Add widgets to sidebars as needed
+    QVBoxLayout *meshLayout = new QVBoxLayout;
+    meshSidebar->setLayout(meshLayout);
+
+    // Add the label at the top
+    QLabel *meshLabel = new QLabel("Mesh Sidebar", this);
+    meshLayout->addWidget(meshLabel, 0, Qt::AlignTop);
+
+
+    QFrame *line_mesh = new QFrame(this);
+    line_mesh->setFrameShape(QFrame::HLine);
+    line_mesh->setFrameShadow(QFrame::Sunken);
+    meshLayout->addWidget(line_mesh);
+
+    // Add label for mesh options
+    QLabel *MeshParamLabel = new QLabel("Mesh Parameters", this);
+    meshLayout->addWidget(MeshParamLabel);
+
+
+
+
+    meshLayout->addStretch(1);
 
 
 

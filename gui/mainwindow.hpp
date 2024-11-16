@@ -23,9 +23,11 @@
 #include <chrono>
 
 #include "drawgeometry.hpp"
+#include "drawmesh.hpp"
 #include "ConsoleOutput.hpp"
 
 class DrawGeoArea;
+class DrawMeshArea;
 
 class MainWindow : public QMainWindow
 {
@@ -55,6 +57,9 @@ private slots:
     // Slot for clear screen
     void clearScreen();
 
+    // Handle tab change
+    void handleTabChange(int index);
+
     
 private:
     void createActions();
@@ -63,12 +68,15 @@ private:
     void createSidebars();
     QTabWidget *tabWidget;
 
+    Me2sh_Geometry *geo;
+
     QStackedWidget *sidebarStack;
     QWidget *geometrySidebar;
     QWidget *meshSidebar;
     QWidget *simulationSidebar;
 
     DrawGeoArea *drawGeoArea;
+    DrawMeshArea *drawMeshArea;
     ConsoleOutput *msgBox;
     
 

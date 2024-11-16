@@ -14,8 +14,8 @@
 #endif
 #endif
 
-DrawGeoArea::DrawGeoArea(QWidget *parent)
-    : QWidget(parent)
+DrawGeoArea::DrawGeoArea(Me2sh_Geometry *geometry, QWidget *parent)
+    : QWidget(parent), geo(geometry)
 {
     setAttribute(Qt::WA_StaticContents);
     setMouseTracking(true);
@@ -64,6 +64,16 @@ void DrawGeoArea::mousePressEvent(QMouseEvent *event)
             selectingCenter = false;
             clearTemporaryLayer();
         }
+    } else if (selectingRect) {
+        if (event->button() == Qt::LeftButton) {
+            double scale = (double)std::max(width(), height());
+            double centerX = (double)event->position().x() / scale;
+            double centerY = 1.0 - (double)event->position().y() / scale;
+            geo->addRectangle(centerX, centerY, rx, ry);
+            drawShape();
+            selectingRect = false;
+            clearTemporaryLayer();
+        }
     } else if (Qt::ControlModifier == QApplication::keyboardModifiers()){
         if (event->button() == Qt::LeftButton) {
             lastPoint = event->position().toPoint();
@@ -100,6 +110,18 @@ void DrawGeoArea::drawTemporaryCircle(const QPoint &center)
     QPainter painter(&tempImage);
     painter.setPen(QPen(Qt::red, myPenWidth, Qt::DashLine, Qt::RoundCap, Qt::RoundJoin));
     painter.drawEllipse(center, rxi, ryi);
+    modified = true;
+    update();
+}
+
+void DrawGeoArea::drawTemporarRectangle(const QPoint &center)
+{
+    int scale = std::max(width(), height());
+    int rxi = (int)(rx*scale);
+    int ryi = (int)(ry*scale);
+    QPainter painter(&tempImage);
+    painter.setPen(QPen(Qt::red, myPenWidth, Qt::DashLine, Qt::RoundCap, Qt::RoundJoin));
+    painter.drawRect(center.x()-rxi, center.y()-ryi, 2*rxi, 2*ryi);
     modified = true;
     update();
 }
@@ -160,6 +182,12 @@ bool DrawGeoArea::event(QEvent *event)
         clearTemporaryLayer(); // Clear the previous temporary circle
         drawTemporaryCircle(p); // Draw the new temporary circle
         return true;
+    } else if (event->type() == QEvent::HoverMove && selectingRect) {
+        QHoverEvent *hoverEvent = static_cast<QHoverEvent *>(event);
+        QPoint p = hoverEvent->position().toPoint();
+        clearTemporaryLayer(); // Clear the previous temporary circle
+        drawTemporarRectangle(p); // Draw the new temporary circle
+        return true;
     }
     return QWidget::event(event);
 }
@@ -170,6 +198,10 @@ void DrawGeoArea::paintEvent(QPaintEvent *event)
     QRect dirtyRect = event->rect();
     painter.drawImage(dirtyRect, image, dirtyRect); // Draw the main image
     painter.drawImage(dirtyRect, tempImage, dirtyRect); // Draw the temporary image
+
+    // Draw the axis and labels
+    drawAxis(painter);
+    drawAxisLabels(painter);
 }
 
 void DrawGeoArea::resizeEvent(QResizeEvent *event)
@@ -291,4 +323,47 @@ void DrawGeoArea::drawEllipse()
     ry = rm;
 
     selectingCenter = true;
+}
+
+void DrawGeoArea::drawRectangle() {
+    bool ok;
+    rx = QInputDialog::getDouble(this, tr("Input Length"),
+                                           tr("Length:"), 0.10, 0, 100, 2, &ok);
+    if (!ok) return;
+
+    ry = QInputDialog::getDouble(this, tr("Input Height"),
+                                           tr("Height:"), 0.10, 0, 100, 2, &ok);
+    if (!ok) return;
+
+    selectingRect = true;
+}
+
+void DrawGeoArea::drawAxis(QPainter &painter)
+{
+    painter.setPen(QPen(Qt::black, 2, Qt::SolidLine, Qt::RoundCap, Qt::RoundJoin));
+
+    // Draw X axis
+    painter.drawLine(0, height() / 2, width(), height() / 2);
+
+    // Draw Y axis
+    painter.drawLine(width() / 2, 0, width() / 2, height());
+}
+
+void DrawGeoArea::drawAxisLabels(QPainter &painter)
+{
+    painter.setPen(QPen(Qt::black));
+    painter.setFont(QFont("Arial", 10));
+    double scale = (double)std::max(width(), height());
+
+    // Draw X axis labels
+    for (int i = 0; i <= width(); i += width() / 10) {
+        int x = i - width() / 2;
+        painter.drawText(i, height() / 2 + 15, QString::number(x/scale));
+    }
+
+    // Draw Y axis labels
+    for (int i = 0; i <= height(); i += height() / 10) {
+        int y = height() / 2 - i;
+        painter.drawText(width() / 2 + 5, i, QString::number(y/scale));
+    }
 }

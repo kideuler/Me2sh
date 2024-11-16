@@ -22,6 +22,12 @@ TEST(createEllipse, geomTest) {
     gmsh::model::mesh::generate(2);
 }
 
+TEST(createRectangle, geomTest) {
+    Me2sh_Geometry geo;
+    geo.addRectangle(0.5,0.5,0.3,0.2);
+    gmsh::model::mesh::generate(2);
+}
+
 TEST(createSpline, geomTest) {
     int np = 100;
     Me2sh_Geometry geo;
