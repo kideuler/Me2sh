@@ -1,20 +1,36 @@
-cmake_minimum_required(VERSION 3.5)
+cmake_minimum_required(VERSION 3.30.0)
+
+set(CMAKE_OSX_ARCHITECTURES "arm64")
+set(CMAKE_CXX_STANDARD 17)
 
 project(
   Me2sh
   VERSION 0.0.3
   LANGUAGES CXX C)
 
+
+
+
 include(CTest)
 
-set(CMAKE_CXX_STANDARD 17)
+# set build type
 
-set(CMAKE_OSX_ARCHITECTURES "arm64")
-
+# Find all necessary libraries
 find_package(Qt6
     REQUIRED COMPONENTS Core Gui Widgets
-    OPTIONAL_COMPONENTS PrintSupport
 )
+find_package(Gmsh REQUIRED)
+
+
+# geometry library
+file( GLOB GEOMETRY_SRCS ${CMAKE_CURRENT_SOURCE_DIR}/geom/*.cpp ${CMAKE_CURRENT_SOURCE_DIR}/geom/*.hpp )
+# print the files
+add_library(geometry SHARED ${GEOMETRY_SRCS})
+target_include_directories(geometry PUBLIC ${CMAKE_CURRENT_SOURCE_DIR}/geom)
+target_link_libraries(geometry PUBLIC Gmsh::Gmsh)
+
+# adding tests
+add_subdirectory(test)
 
 qt_standard_project_setup()
 
@@ -30,9 +46,16 @@ set_target_properties(me2sh PROPERTIES
     MACOSX_BUNDLE TRUE
 )
 
+target_include_directories(me2sh PUBLIC
+    ${CMAKE_CURRENT_SOURCE_DIR}/geom
+    ${CMAKE_CURRENT_SOURCE_DIR}/gui
+)
+
 target_link_libraries(me2sh PRIVATE
     Qt6::Core
     Qt6::Gui
     Qt6::Widgets
+    geometry
 )
+
 

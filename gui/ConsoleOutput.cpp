@@ -21,5 +21,5 @@ ConsoleOutput::ConsoleOutput(QWidget *parent) : QWidget(parent)
 
 void ConsoleOutput::addMessage(const QString &text)
 {
-    msgBox->append(text);
+    msgBox->append(">>> " + text);
 }

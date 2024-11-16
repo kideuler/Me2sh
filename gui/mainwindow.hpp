@@ -18,6 +18,8 @@
 #include <QStackedWidget>
 #include <QVBoxLayout>
 #include <QLabel>
+#include <QScreen>
+#include <QGuiApplication>
 #include <chrono>
 
 #include "drawgeometry.hpp"
@@ -80,6 +82,11 @@ private:
     QAction *aboutAct;
     QAction *aboutQtAct;
     QAction *clearAct;
+
+    QScreen *screen;
+
+    int screenWidth;
+    int screenHeight;
 };
 
 #endif

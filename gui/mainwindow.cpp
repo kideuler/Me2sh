@@ -14,11 +14,17 @@
 #include <QStackedWidget>
 #include <QVBoxLayout>
 #include <QLabel>
+#include <QPushButton>
 #include <chrono>
 
 MainWindow::MainWindow(QWidget *parent)
     : QMainWindow(parent), drawGeoArea(new DrawGeoArea(this))
-{   
+{ 
+    screen = QGuiApplication::primaryScreen();
+    QRect screenGeometry = screen->geometry();
+    screenWidth = screenGeometry.width()*0.9;
+    screenHeight = screenGeometry.height()*0.9;
+
     tabWidget = new QTabWidget(this);
     tabWidget->addTab(drawGeoArea, tr("Geometry"));
     tabWidget->addTab(new QWidget(), tr("Mesh"));
@@ -31,7 +37,7 @@ MainWindow::MainWindow(QWidget *parent)
     QSplitter *centralWidget = new QSplitter(Qt::Vertical, this);
     centralWidget->addWidget(tabWidget);
     centralWidget->addWidget(msgBox);
-    centralWidget->setSizes(QList<int>{height, 800-height});
+    centralWidget->setSizes(QList<int>{int(0.8*screenHeight), int(0.2*screenHeight)});
 
     setCentralWidget(centralWidget);
     createActions();
@@ -42,6 +48,8 @@ MainWindow::MainWindow(QWidget *parent)
     resize(1600, 800);
 
     connect(tabWidget, &QTabWidget::currentChanged, this, &MainWindow::updateSidebar);
+
+    drawGeoArea->clearImage();
 }
 
 void MainWindow::createSidebars()
@@ -53,14 +61,63 @@ void MainWindow::createSidebars()
     simulationSidebar = new QWidget(this);
 
     // Add widgets to sidebars as needed
-    geometrySidebar->setLayout(new QVBoxLayout);
-    geometrySidebar->layout()->addWidget(new QLabel("Geometry Sidebar"));
+    QVBoxLayout *geometryLayout = new QVBoxLayout;
+    geometrySidebar->setLayout(geometryLayout);
+
+    // Add the label at the top
+    QLabel *geometryLabel = new QLabel("Geometry Sidebar", this);
+    geometryLayout->addWidget(geometryLabel, 0, Qt::AlignTop);
+
+    QFrame *line = new QFrame(this);
+    line->setFrameShape(QFrame::HLine);
+    line->setFrameShadow(QFrame::Sunken);
+    geometryLayout->addWidget(line);
+
+    // Add label for geometry creation
+    QLabel *geometryCreationLabel = new QLabel("Create", this);
+    geometryLayout->addWidget(geometryCreationLabel);
+
+    // Add the push buttons right under the label
+    QPushButton *drawCircleButton = new QPushButton(tr("Draw Circle"), this);
+    geometryLayout->addWidget(drawCircleButton);
+    connect(drawCircleButton, &QPushButton::clicked, drawGeoArea, &DrawGeoArea::drawCircle);
+
+    QPushButton *drawEllipseButton = new QPushButton(tr("Draw Ellipse"), this);
+    geometryLayout->addWidget(drawEllipseButton);
+    connect(drawEllipseButton, &QPushButton::clicked, drawGeoArea, &DrawGeoArea::drawEllipse);
+
+    QPushButton *drawSplineButton = new QPushButton(tr("Draw Spline"), this);
+    geometryLayout->addWidget(drawSplineButton);
+    connect(drawSplineButton, &QPushButton::clicked, drawGeoArea, &DrawGeoArea::drawSpline);
+
+    QPushButton *drawBSplineButton = new QPushButton(tr("Draw BSpline"), this);
+    geometryLayout->addWidget(drawBSplineButton);
+    connect(drawBSplineButton, &QPushButton::clicked, drawGeoArea, &DrawGeoArea::drawBSpline);
+
+    // QPushButton *drawBezierButton = new QPushButton(tr("Draw Bezier"), this);
+    // geometryLayout->addWidget(drawBezierButton);
+    // connect(drawBezierButton, &QPushButton::clicked, drawGeoArea, &DrawGeoArea::drawBezier);
+
+    // Add a stretch at the end to push everything to the top
+    geometryLayout->addStretch(1);
+
+
+
 
     meshSidebar->setLayout(new QVBoxLayout);
     meshSidebar->layout()->addWidget(new QLabel("Mesh Sidebar"));
 
+
+
+
+
+
     simulationSidebar->setLayout(new QVBoxLayout);
     simulationSidebar->layout()->addWidget(new QLabel("Simulation Sidebar"));
+
+
+
+
 
     sidebarStack->addWidget(geometrySidebar);
     sidebarStack->addWidget(meshSidebar);
@@ -70,7 +127,7 @@ void MainWindow::createSidebars()
     QSplitter *mainSplitter = new QSplitter(Qt::Horizontal, this);
     mainSplitter->addWidget(sidebarStack);
     mainSplitter->addWidget(centralWidget());
-    mainSplitter->setSizes(QList<int>{100, width()-100});
+    mainSplitter->setSizes(QList<int>{int(0.1*screenWidth), int(0.9*screenWidth)});
     setCentralWidget(mainSplitter);
 }
 
