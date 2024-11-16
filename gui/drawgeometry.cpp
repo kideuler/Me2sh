@@ -254,12 +254,14 @@ void DrawGeoArea::drawBSpline(){
     clearTemporaryLayer();
 }
 
+#ifdef USE_GEO
 void DrawGeoArea::drawBezier(){
     geo->addBezier(geo->firstPointIndex, geo->points.size());
 
     drawShape();
     clearTemporaryLayer();
 }
+#endif
 
 void DrawGeoArea::drawCircle()
 {

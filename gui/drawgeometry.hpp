@@ -21,9 +21,12 @@ public:
 
     void drawSpline();
     void drawBSpline();
-    void drawBezier();
     void drawCircle();
     void drawEllipse();
+
+    #ifdef USE_GEO
+    void drawBezier();
+    #endif
 
     bool isModified() const { return modified; }
     QColor penColor() const { return myPenColor; }

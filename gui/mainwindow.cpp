@@ -94,9 +94,11 @@ void MainWindow::createSidebars()
     geometryLayout->addWidget(drawBSplineButton);
     connect(drawBSplineButton, &QPushButton::clicked, drawGeoArea, &DrawGeoArea::drawBSpline);
 
-    // QPushButton *drawBezierButton = new QPushButton(tr("Draw Bezier"), this);
-    // geometryLayout->addWidget(drawBezierButton);
-    // connect(drawBezierButton, &QPushButton::clicked, drawGeoArea, &DrawGeoArea::drawBezier);
+    #ifdef USE_GEO
+    QPushButton *drawBezierButton = new QPushButton(tr("Draw Bezier"), this);
+    geometryLayout->addWidget(drawBezierButton);
+    connect(drawBezierButton, &QPushButton::clicked, drawGeoArea, &DrawGeoArea::drawBezier);
+    #endif
 
     // Add a stretch at the end to push everything to the top
     geometryLayout->addStretch(1);

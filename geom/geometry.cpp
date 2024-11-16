@@ -120,33 +120,34 @@ void Me2sh_Geometry::addBSpline(int istart, int iend){
     }
 }
 
+#ifdef USE_GEO
 void Me2sh_Geometry::addBezier(int istart, int iend){
 
     std::vector<int> tags;
 
-    int gstart = gmsh::model::occ::addPoint(points[istart][0], points[istart][1], points[istart][2]);
+    int gstart = gmsh::model::geo::addPoint(points[istart][0], points[istart][1], points[istart][2]);
     tags.push_back(gstart);
     for (int i = istart+1; i < iend-1; i++){
-        int tag = gmsh::model::occ::addPoint(points[i][0], points[i][1], points[i][2]);
+        int tag = gmsh::model::geo::addPoint(points[i][0], points[i][1], points[i][2]);
         tags.push_back(tag);
     }
-    int gend = gmsh::model::occ::addPoint(points[iend-1][0], points[iend-1][1], points[iend-1][2]);
-    gmsh::model::occ::synchronize();
+    int gend = gmsh::model::geo::addPoint(points[iend-1][0], points[iend-1][1], points[iend-1][2]);
+    gmsh::model::geo::synchronize();
     tags.push_back(gend);
     tags.push_back(gstart);
     
 
     firstPointIndex = iend;
 
-    int stag = gmsh::model::occ::addBezier(tags);
-    gmsh::model::occ::synchronize();
+    int stag = gmsh::model::geo::addBezier(tags);
+    gmsh::model::geo::synchronize();
 
-    int wtag = gmsh::model::occ::addCurveLoop({stag});
-    gmsh::model::occ::synchronize();
+    int wtag = gmsh::model::geo::addCurveLoop({stag});
+    gmsh::model::geo::synchronize();
     curveLoopTags.push_back(wtag);
 
-    int planetag = gmsh::model::occ::addPlaneSurface({wtag});
-    gmsh::model::occ::synchronize();
+    int planetag = gmsh::model::geo::addPlaneSurface({wtag});
+    gmsh::model::geo::synchronize();
 
     planeTags.push_back(planetag);
 
@@ -166,3 +167,4 @@ void Me2sh_Geometry::addBezier(int istart, int iend){
         plot_points.push_back({coords[i], coords[i+1]});
     }
 }
+#endif

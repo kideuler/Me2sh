@@ -37,7 +37,9 @@ class Me2sh_Geometry {
 
         void addSpline(int istart, int iend);
         void addBSpline(int istart, int iend);
+#ifdef USE_GEO
         void addBezier(int istart, int iend);
+#endif
         void addEllipse(double x, double y, double rx, double ry);
 
 };
