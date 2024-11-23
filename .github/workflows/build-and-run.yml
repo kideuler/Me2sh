@@ -21,7 +21,7 @@ jobs:
         include:
           - os: macos-latest
             c_compiler: clang
-            cpp_compiler: clang
+            cpp_compiler: clang++
           - os: ubuntu-latest
             c_compiler: gcc
             cpp_compiler: g++
@@ -61,7 +61,7 @@ jobs:
       if: matrix.os == 'ubuntu-latest'
       run: |
         sudo apt-get update
-        sudo apt-get install -y cmake libglx-dev qt6-base-dev libgmsh-dev libgtest-dev
+        sudo apt-get install -y cmake libglx-dev libgl1-mesa-dev qt6-base-dev libgmsh-dev libgtest-dev
 
     - name: Configure CMake
       # Configure CMake in a 'build' subdirectory. `CMAKE_BUILD_TYPE` is only required if you are using a single-configuration generator such as make.
