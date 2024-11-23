@@ -37,6 +37,7 @@ find_path(GMSH_INC gmsh.h)
 if(NOT GMSH_INC)
   message(FATAL_ERROR "Could not find gmsh.h")
 endif()
+message(STATUS "found gmsh at GMSH_INC: ${GMSH_INC}, GMSH_LIB: ${GMSH_LIB}")
 include_directories(${GMSH_INC})
 
 
