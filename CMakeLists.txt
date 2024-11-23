@@ -28,6 +28,8 @@ find_package(Qt6
     REQUIRED COMPONENTS Core Gui Widgets
 )
 
+find_package(Python3 REQUIRED COMPONENTS Interpreter Development)
+
 find_library(GMSH_LIB gmsh)
 if(NOT GMSH_LIB)
   message(FATAL_ERROR "Could not find libgmsh")
@@ -40,6 +42,9 @@ endif()
 message(STATUS "found gmsh at GMSH_INC: ${GMSH_INC}, GMSH_LIB: ${GMSH_LIB}")
 include_directories(${GMSH_INC})
 
+# Include Python headers and libraries
+include_directories(${Python3_INCLUDE_DIRS})
+link_directories(${Python3_LIBRARY_DIRS})
 
 # geometry library
 file( GLOB GEOMETRY_SRCS ${CMAKE_CURRENT_SOURCE_DIR}/geom/*.cpp ${CMAKE_CURRENT_SOURCE_DIR}/geom/*.hpp )
@@ -81,6 +86,7 @@ set_target_properties(me2sh PROPERTIES
 target_include_directories(me2sh PUBLIC
     ${CMAKE_CURRENT_SOURCE_DIR}/geom
     ${CMAKE_CURRENT_SOURCE_DIR}/gui
+    ${Python3_INCLUDE_DIRS}
 )
 
 target_link_libraries(me2sh PRIVATE
@@ -89,6 +95,6 @@ target_link_libraries(me2sh PRIVATE
     Qt6::Widgets
     geometry
     meshing
+    ${Python3_LIBRARIES}
 )
-
 

@@ -1,6 +1,9 @@
 #ifndef MAINWINDOW_H
 #define MAINWINDOW_H
 
+#include <Python.h>
+#undef B0
+
 #include <QList>
 #include <QMainWindow>
 #include <QTabWidget>
@@ -40,6 +43,10 @@ public:
     // clear screen
     void clearScreen();
 
+    DrawGeoArea *drawGeoArea;
+    DrawMeshArea *drawMeshArea;
+    ConsoleOutput *PythonTerminal;
+
 protected:
     // Event handler for close event
     void closeEvent(QCloseEvent *event) override;
@@ -75,10 +82,6 @@ private:
     QWidget *geometrySidebar;
     QWidget *meshSidebar;
     QWidget *simulationSidebar;
-
-    DrawGeoArea *drawGeoArea;
-    DrawMeshArea *drawMeshArea;
-    ConsoleOutput *msgBox;
     
 
     QMenu *optionMenu;

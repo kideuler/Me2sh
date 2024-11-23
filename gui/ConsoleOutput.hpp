@@ -1,22 +1,33 @@
 #ifndef CONSOLEOUTPUT_HPP
 #define CONSOLEOUTPUT_HPP
 
-#include <QWidget>
+#include <Python.h>
 #include <QTextEdit>
+#include <QWidget>
 
-class ConsoleOutput : public QWidget {
+class ConsoleOutput : public QTextEdit {
     Q_OBJECT
 
-    public:
-        ConsoleOutput(QWidget *parent = nullptr);
-        void clear() {msgBox->clear();}
+public:
+    ConsoleOutput(QWidget *parent = nullptr);
+    void clear() { QTextEdit::clear(); }
+    void printString(const QString &text);
+    void executeCommand(const QString &command);
+    void appendPrompt();
+
+protected:
+    void keyPressEvent(QKeyEvent *event) override;
+    void mousePressEvent(QMouseEvent *event) override;
+    void mouseReleaseEvent(QMouseEvent *event) override;
+
+private:
     
-    public Q_SLOTS:
+    void showPreviousCommand();
 
-        void addMessage(const QString &text);
-
-    private:
-        QTextEdit *msgBox = nullptr;
+    QString prompt = ">>> ";
+    QString currentCommand;
+    QStringList commandHistory;
+    int historyIndex = -1;
 };
 
-#endif
+#endif // CONSOLEOUTPUT_HPP

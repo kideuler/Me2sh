@@ -35,13 +35,13 @@ MainWindow::MainWindow(QWidget *parent)
     tabWidget->addTab(drawMeshArea, tr("Mesh"));
     tabWidget->addTab(new QWidget(), tr("Simulation"));
 
-    msgBox = new ConsoleOutput(this);
+    PythonTerminal = new ConsoleOutput(this);
 
     QSettings settings;
     int height = settings.value("Split", 600).toInt();
     QSplitter *centralWidget = new QSplitter(Qt::Vertical, this);
     centralWidget->addWidget(tabWidget);
-    centralWidget->addWidget(msgBox);
+    centralWidget->addWidget(PythonTerminal);
     centralWidget->setSizes(QList<int>{int(0.8*screenHeight), int(0.2*screenHeight)});
 
     setCentralWidget(centralWidget);
@@ -56,6 +56,7 @@ MainWindow::MainWindow(QWidget *parent)
     connect(tabWidget, &QTabWidget::currentChanged, this, &MainWindow::handleTabChange);
 
     drawGeoArea->clearImage();
+    
 }
 
 void MainWindow::handleTabChange(int index)
@@ -246,7 +247,7 @@ void MainWindow::about()
 void MainWindow::clearScreen(){
     drawGeoArea->clearImage();
     drawMeshArea->clearImage();
-    msgBox->clear();
+    PythonTerminal->clear();
 }
 
 void MainWindow::createActions()

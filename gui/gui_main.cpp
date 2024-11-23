@@ -1,6 +1,5 @@
-#include <QApplication>
-
 #include "mainwindow.hpp"
+#include <QApplication>
 
 int main(int argc, char *argv[])
 {   
@@ -17,6 +16,8 @@ int main(int argc, char *argv[])
     window.show();
     window.clearScreen(); // ensure the screen is clear
     // Run the application
+    window.PythonTerminal->executeCommand("print('Python interpreter initialized')");
+    window.PythonTerminal->appendPrompt();
     app.exec();
     gmsh::finalize();
     return 0;

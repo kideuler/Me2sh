@@ -233,6 +233,7 @@ void DrawMeshArea::changeMeshAlgorithm(){
 }
 
 void DrawMeshArea::generateMesh(){
+
     clearImage();
     int TriAlgos[2] = {6,5};
     int QuadAlgos[4] = {6,8,9,11};
