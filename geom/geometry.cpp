@@ -75,8 +75,58 @@ void Me2sh_Geometry::addRectangle(double x, double y, double lx, double ly){
     }
 }
 
-void Me2sh_Geometry::addSpline(int istart, int iend){
+void Me2sh_Geometry::MakeRectangleAndCut(double x, double y, double lx, double ly){
 
+    // making rectangle
+    int v1 = gmsh::model::occ::addPoint(x-lx, y-ly, 0.0);
+    int v2 = gmsh::model::occ::addPoint(x+lx, y-ly, 0.0);
+    int v3 = gmsh::model::occ::addPoint(x+lx, y+ly, 0.0);
+    int v4 = gmsh::model::occ::addPoint(x-lx, y+ly, 0.0);
+
+    std::vector<int> ltags(4);
+    ltags[0] = gmsh::model::occ::addLine(v1, v2);
+    curveTags.push_back(ltags[0]);
+    ltags[1] = gmsh::model::occ::addLine(v2, v3);
+    curveTags.push_back(ltags[1]);
+    ltags[2] = gmsh::model::occ::addLine(v3, v4);
+    curveTags.push_back(ltags[2]);
+    ltags[3] = gmsh::model::occ::addLine(v4, v1);
+    curveTags.push_back(ltags[3]);
+
+    gmsh::model::occ::synchronize();
+
+    int wtag = gmsh::model::occ::addCurveLoop(ltags);
+    gmsh::model::occ::synchronize();
+
+    int planetag = gmsh::model::occ::addPlaneSurface({wtag});
+    gmsh::model::occ::synchronize();
+
+    planeTags.push_back(planetag);
+
+    plot_points.clear();
+    for (int i = 0; i < 4; i++){
+        std::vector<double> min, max;
+        gmsh::model::getParametrizationBounds(1, ltags[i], min, max);
+
+        std::vector<double> params;
+        double h = (max[0]-min[0])/20.0;
+        for (double t = min[0]; t < max[0]; t += h){
+            params.push_back(t);
+        }
+        std::vector<double> coords;
+
+        gmsh::model::getValue(1, ltags[i], params, coords);
+        for (int i = 0; i < coords.size(); i+=3){
+            plot_points.push_back({coords[i], coords[i+1]});
+        }
+    }
+
+    // cutting the other geometries out of the rectangle
+    ExteriorTag = planetag;
+}
+
+void Me2sh_Geometry::addSpline(int istart, int iend){
+    
     std::vector<int> tags;
 
     int gstart = gmsh::model::occ::addPoint(points[istart][0], points[istart][1], points[istart][2]);
@@ -163,6 +213,46 @@ void Me2sh_Geometry::addBSpline(int istart, int iend){
     for (int i = 0; i < coords.size(); i+=3){
         plot_points.push_back({coords[i], coords[i+1]});
     }
+}
+
+void Me2sh_Geometry::FuseOverlapping(){
+    gmsh::model::occ::synchronize();
+
+    gmsh::vectorpair c1;
+    gmsh::vectorpair s1;
+    gmsh::vectorpair s2;
+    gmsh::vectorpair s3;
+    std::vector<gmsh::vectorpair> outDimTagsMap;
+
+    std::vector<int> newPlanetags;
+    std::vector<int> newCurvetags;
+
+    gmsh::model::getEntities(s1, 2);
+    gmsh::model::getEntities(s2, 2);
+
+    gmsh::model::occ::fuse(s1, s2, s3, outDimTagsMap);
+    gmsh::model::occ::removeAllDuplicates();
+    gmsh::model::occ::synchronize();
+
+    gmsh::model::getEntities(c1, 1);
+    gmsh::model::getEntities(s1, 2);
+    
+
+    for (int i = 0; i < c1.size(); i++){
+        if (c1[i].first == 1){
+            newCurvetags.push_back(c1[i].second);
+        }
+    }
+
+    for (int i = 0; i < s1.size(); i++){
+        newPlanetags.push_back(s1[i].second);
+    }
+    curveTags = newCurvetags;
+    planeTags = newPlanetags;
+    gmsh::model::occ::synchronize();
+
+    
+        
 }
 
 #ifdef USE_GEO

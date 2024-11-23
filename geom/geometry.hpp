@@ -9,8 +9,8 @@
 
 class Me2sh_Geometry {
     public:
-        Me2sh_Geometry(){gmsh::initialize();};
-        ~Me2sh_Geometry(){gmsh::finalize();};
+        Me2sh_Geometry(){};
+        ~Me2sh_Geometry(){};
         
 
         std::vector<std::array<double, 3>> points;
@@ -19,6 +19,7 @@ class Me2sh_Geometry {
         std::vector<int> curveTags;
         std::vector<int> planeTags;
         int firstPointIndex = 0;
+        int ExteriorTag;
 
         void clear(){
             points.clear();
@@ -43,6 +44,8 @@ class Me2sh_Geometry {
         void addEllipse(double x, double y, double rx, double ry);
         void addRectangle(double x, double y, double lx, double ly);
 
+        void FuseOverlapping();
+        void MakeRectangleAndCut(double x, double y, double lx, double ly);
 };
 
 #endif // GEOM_H

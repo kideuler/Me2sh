@@ -14,7 +14,7 @@
 #endif
 #endif
 
-DrawGeoArea::DrawGeoArea(Me2sh_Geometry *geometry, QWidget *parent)
+DrawGeoArea::DrawGeoArea(std::shared_ptr<Me2sh_Geometry> geometry, QWidget *parent)
     : QWidget(parent), geo(geometry)
 {
     setAttribute(Qt::WA_StaticContents);
@@ -273,11 +273,12 @@ void DrawGeoArea::drawShape(){
         QPoint p = {(int)(geo->plot_points[i][0]*scale), (int)((1.0-geo->plot_points[i][1])*scale)};
         drawLineTo(p, &image, Qt::black);
     }
-    drawLineTo(firstPoint);
+    //drawLineTo(firstPoint);
     update();
 }
 
 void DrawGeoArea::drawSpline(){
+    if (geo->points.size()-geo->firstPointIndex <= 1){return;}
     geo->addSpline(geo->firstPointIndex, geo->points.size());
 
     drawShape();
@@ -285,6 +286,7 @@ void DrawGeoArea::drawSpline(){
 }
 
 void DrawGeoArea::drawBSpline(){
+    if (geo->points.size()-geo->firstPointIndex <= 1){return;}
     geo->addBSpline(geo->firstPointIndex, geo->points.size());
 
     drawShape();
@@ -343,6 +345,34 @@ void DrawGeoArea::drawRectangle() {
     selectingRect = true;
 }
 
+void DrawGeoArea::FuseAll(){
+    geo->FuseOverlapping();
+    tempImage.fill(Qt::transparent);
+    image.fill(qRgb(255, 255, 255));
+    drawgeometry();
+    clearTemporaryLayer();
+}
+
+void DrawGeoArea::MakeExteriorRectangle(){
+    // Make rectangle that is screen size
+    double scale = (double)std::max(width(), height());
+    double w = (double)width()/scale; 
+    double cx = w/2.0;
+    double dx = cx;
+    double h = (double)height()/scale;
+    double cy = 1.0 - h/2.0;
+    double dy = 1.0 - cy;
+    geo->MakeRectangleAndCut(cx, cy, dx-0.01, dy-0.01);
+    drawShape();
+}
+
+void DrawGeoArea::MakeExteriorGeometry(){
+    if (exterior_geom){return;}
+
+    exterior_geom = true;
+    MakeExteriorRectangle();
+}
+
 void DrawGeoArea::drawAxis(QPainter &painter)
 {
     painter.setPen(QPen(Qt::black, 2, Qt::SolidLine, Qt::RoundCap, Qt::RoundJoin));
@@ -362,13 +392,37 @@ void DrawGeoArea::drawAxisLabels(QPainter &painter)
 
     // Draw X axis labels
     for (int i = 0; i <= width(); i += width() / 10) {
-        int x = i - width() / 2;
+        int x = i - width();
         painter.drawText(i, height() / 2 + 15, QString::number(x/scale));
     }
 
     // Draw Y axis labels
     for (int i = 0; i <= height(); i += height() / 10) {
-        int y = height() / 2 - i;
+        int y = height() - i;
         painter.drawText(width() / 2 + 5, i, QString::number(y/scale));
+    }
+}
+
+
+void DrawGeoArea::drawgeometry(){
+    // draw all goemetries in geo filled in with
+    for (int i = 0; i < geo->curveTags.size(); i++){
+        int stag = geo->curveTags[i];
+        std::vector<double> min, max;
+        gmsh::model::getParametrizationBounds(1, stag, min, max);
+
+        std::vector<double> params;
+        double h = (max[0]-min[0])/500.0;
+        for (double t = min[0]; t < max[0]; t += h){
+            params.push_back(t);
+        }
+        std::vector<double> coords;
+
+        gmsh::model::getValue(1,stag,params,coords);
+        geo->plot_points.clear();
+        for (int i = 0; i < coords.size(); i+=3){
+            geo->plot_points.push_back({coords[i], coords[i+1]});
+        }
+        drawShape();
     }
 }

@@ -18,8 +18,13 @@
 #include <chrono>
 
 MainWindow::MainWindow(QWidget *parent)
-    : QMainWindow(parent), geo(new Me2sh_Geometry()), drawGeoArea(new DrawGeoArea(geo,this)), drawMeshArea(new DrawMeshArea(geo, this))
+    : QMainWindow(parent)
 { 
+    geo = std::make_shared<Me2sh_Geometry>();
+    mesh = std::make_shared<Me2sh_Mesh>();
+    drawGeoArea = new DrawGeoArea(geo, this);
+    drawMeshArea = new DrawMeshArea(geo, mesh, this);
+
     screen = QGuiApplication::primaryScreen();
     QRect screenGeometry = screen->geometry();
     screenWidth = screenGeometry.width()*0.9;
@@ -56,7 +61,12 @@ MainWindow::MainWindow(QWidget *parent)
 void MainWindow::handleTabChange(int index)
 {
     if (tabWidget->widget(index) == drawMeshArea) {
-        drawMeshArea->drawgeometry();
+        // if (!drawMeshArea->hasMesh){
+        //     drawMeshArea->drawgeometry();
+        // } else {
+        //     drawMeshArea->drawgeometry();
+        //     drawMeshArea->displayMesh();
+        // }
     }
 }
 
@@ -86,23 +96,23 @@ void MainWindow::createSidebars()
     geometryLayout->addWidget(geometryCreationLabel);
 
     // Add the push buttons right under the label
-    QPushButton *drawCircleButton = new QPushButton(tr("Draw Circle"), this);
+    QPushButton *drawCircleButton = new QPushButton(tr("Create Circle"), this);
     geometryLayout->addWidget(drawCircleButton);
     connect(drawCircleButton, &QPushButton::clicked, drawGeoArea, &DrawGeoArea::drawCircle);
 
-    QPushButton *drawEllipseButton = new QPushButton(tr("Draw Ellipse"), this);
+    QPushButton *drawEllipseButton = new QPushButton(tr("Create Ellipse"), this);
     geometryLayout->addWidget(drawEllipseButton);
     connect(drawEllipseButton, &QPushButton::clicked, drawGeoArea, &DrawGeoArea::drawEllipse);
 
-    QPushButton *drawRectangleButton = new QPushButton(tr("Draw Rectangle"), this);
+    QPushButton *drawRectangleButton = new QPushButton(tr("Create Rectangle"), this);
     geometryLayout->addWidget(drawRectangleButton);
     connect(drawRectangleButton, &QPushButton::clicked, drawGeoArea, &DrawGeoArea::drawRectangle);
 
-    QPushButton *drawSplineButton = new QPushButton(tr("Draw Spline"), this);
+    QPushButton *drawSplineButton = new QPushButton(tr("Create Spline"), this);
     geometryLayout->addWidget(drawSplineButton);
     connect(drawSplineButton, &QPushButton::clicked, drawGeoArea, &DrawGeoArea::drawSpline);
 
-    QPushButton *drawBSplineButton = new QPushButton(tr("Draw BSpline"), this);
+    QPushButton *drawBSplineButton = new QPushButton(tr("Create BSpline"), this);
     geometryLayout->addWidget(drawBSplineButton);
     connect(drawBSplineButton, &QPushButton::clicked, drawGeoArea, &DrawGeoArea::drawBSpline);
 
@@ -111,6 +121,17 @@ void MainWindow::createSidebars()
     geometryLayout->addWidget(drawBezierButton);
     connect(drawBezierButton, &QPushButton::clicked, drawGeoArea, &DrawGeoArea::drawBezier);
     #endif
+
+    QLabel *geometryModificationLabel = new QLabel("Modify", this);
+    geometryLayout->addWidget(geometryModificationLabel);
+
+    QPushButton *fuseButton = new QPushButton(tr("Fuse Overlapping"), this);
+    geometryLayout->addWidget(fuseButton);
+    connect(fuseButton, &QPushButton::clicked, drawGeoArea, &DrawGeoArea::FuseAll);
+
+    QPushButton *makeExteriorGeometryButton = new QPushButton(tr("Make Exterior Geometry"), this);
+    geometryLayout->addWidget(makeExteriorGeometryButton);
+    connect(makeExteriorGeometryButton, &QPushButton::clicked, drawGeoArea, &DrawGeoArea::MakeExteriorGeometry);
 
     // Add a stretch at the end to push everything to the top
     geometryLayout->addStretch(1);
@@ -144,6 +165,19 @@ void MainWindow::createSidebars()
     QPushButton *changeElementTypeButton = new QPushButton(tr("Change Element Type"), this);
     meshLayout->addWidget(changeElementTypeButton);
     connect(changeElementTypeButton, &QPushButton::clicked, drawMeshArea, &DrawMeshArea::changeElementType);
+
+    QFrame *line_mesh2 = new QFrame(this);
+    line_mesh->setFrameShape(QFrame::HLine);
+    line_mesh->setFrameShadow(QFrame::Sunken);
+    meshLayout->addWidget(line_mesh2);
+
+    // Add label for mesh options
+    QLabel *MeshToolLabel = new QLabel("Meshing Tools", this);
+    meshLayout->addWidget(MeshToolLabel);
+
+    QPushButton *generateMeshButton = new QPushButton(tr("Generate Mesh"), this);
+    meshLayout->addWidget(generateMeshButton);
+    connect(generateMeshButton, &QPushButton::clicked, drawMeshArea, &DrawMeshArea::generateMesh);
 
     meshLayout->addStretch(1);
 
@@ -207,6 +241,7 @@ void MainWindow::about()
 
 void MainWindow::clearScreen(){
     drawGeoArea->clearImage();
+    drawMeshArea->clearImage();
     msgBox->clear();
 }
 

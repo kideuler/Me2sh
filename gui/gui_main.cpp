@@ -7,6 +7,8 @@ int main(int argc, char *argv[])
 
     // Create the application
     QApplication app(argc, argv);
+    gmsh::initialize();
+    gmsh::model::add("me2sh");
 
     // Create the main window
     MainWindow window;
@@ -15,5 +17,7 @@ int main(int argc, char *argv[])
     window.show();
     window.clearScreen(); // ensure the screen is clear
     // Run the application
-    return app.exec();
+    app.exec();
+    gmsh::finalize();
+    return 0;
 }

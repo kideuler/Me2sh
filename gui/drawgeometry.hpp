@@ -13,7 +13,7 @@ class DrawGeoArea : public QWidget
     Q_OBJECT
 
 public:
-    DrawGeoArea(Me2sh_Geometry *geometry, QWidget *parent = nullptr);
+    DrawGeoArea(std::shared_ptr<Me2sh_Geometry> geometry, QWidget *parent = nullptr);
     void clearImage();
 
     void setPenColor(const QColor &newColor);
@@ -24,6 +24,9 @@ public:
     void drawCircle();
     void drawEllipse();
     void drawRectangle();
+    void MakeExteriorRectangle();
+    void MakeExteriorGeometry();
+    void FuseAll();
 
     #ifdef USE_GEO
     void drawBezier();
@@ -33,7 +36,7 @@ public:
     QColor penColor() const { return myPenColor; }
     int penWidth() const { return myPenWidth; }
 
-    Me2sh_Geometry *geo = new Me2sh_Geometry();
+    std::shared_ptr<Me2sh_Geometry> geo;
 
     double h_target = 0.02;
     int max_smoothing_iters = 100;
@@ -41,6 +44,7 @@ public:
     bool selectingRect = false;
     double rx = 0.0;
     double ry = 0.0;
+    bool exterior_geom = false;
 
 public slots:
 
@@ -57,6 +61,7 @@ private:
     void drawTemporaryCircle(const QPoint &center);
     void drawTemporarRectangle(const QPoint &center);
     void drawShape();
+    void drawgeometry();
     void clearTemporaryLayer();
     void drawAxis(QPainter &painter); // Add this line
     void drawAxisLabels(QPainter &painter); // Add this line

@@ -6,16 +6,16 @@
 #include <QInputDialog>
 #include <QHoverEvent>
 
-DrawMeshArea::DrawMeshArea(Me2sh_Geometry *geometry, QWidget *parent)
-    : QWidget(parent), geo(geometry)
+DrawMeshArea::DrawMeshArea(std::shared_ptr<Me2sh_Geometry> geometry, std::shared_ptr<Me2sh_Mesh> mesh, QWidget *parent)
+    : QWidget(parent), geo(geometry), mesh(mesh)
 {
     setAttribute(Qt::WA_StaticContents);
     setMouseTracking(true);
     setAttribute(Qt::WA_Hover);
     image = QImage(size(), QImage::Format_RGB32);
     image.fill(qRgb(255, 255, 255));
-    //tempImage = QImage(size(), QImage::Format_ARGB32_Premultiplied);
-    //tempImage.fill(Qt::transparent);
+    tempImage = QImage(size(), QImage::Format_ARGB32_Premultiplied);
+    tempImage.fill(Qt::transparent);
 }
 
 void DrawMeshArea::clearImage()
@@ -23,7 +23,9 @@ void DrawMeshArea::clearImage()
     tempImage.fill(Qt::transparent);
     image.fill(qRgb(255, 255, 255));
     modified = true;
-    geo->clear();
+    hasMesh = false;
+    //geo->clear();
+    mesh->clear();
     update();
 }
 
@@ -80,9 +82,7 @@ void DrawMeshArea::drawLineTo(const QPoint &endPoint, QImage *img, QColor PenCol
 
 void DrawMeshArea::resizeImage(QImage *image, const QSize &newSize)
 {
-    if (image->size() == newSize)
-        return;
-
+    if (image->size() == newSize){return;}
     QImage newImage(newSize, image->format());
     newImage.fill(image->format() == QImage::Format_RGB32 ? qRgb(255, 255, 255) : Qt::transparent);
     QPainter painter(&newImage);
@@ -122,13 +122,13 @@ void DrawMeshArea::drawAxisLabels(QPainter &painter)
 
     // Draw X axis labels
     for (int i = 0; i <= width(); i += width() / 10) {
-        int x = i - width() / 2;
+        int x = i - width();
         painter.drawText(i, height() / 2 + 15, QString::number(x/scale));
     }
 
     // Draw Y axis labels
     for (int i = 0; i <= height(); i += height() / 10) {
-        int y = height() / 2 - i;
+        int y = height() - i;
         painter.drawText(width() / 2 + 5, i, QString::number(y/scale));
     }
 }
@@ -157,27 +157,116 @@ void DrawMeshArea::drawgeometry(){
 }
 
 void DrawMeshArea::chanegeMeshSize(){
-    bool ok;
-    double h = QInputDialog::getDouble(this, tr("Input Mesh Size"),
-                                           tr("Mesh Size:"), 0.05, 0, 100, 2, &ok);
-    if (!ok) return;
-    this->h_target = h;
-    gmsh::option::setNumber("Mesh.MeshSizeMin", h_target);
-    gmsh::option::setNumber("Mesh.MeshSizeMax", 1.3*h_target);
+    bool ok = false;
+    double h = 0.05;
+
+    try {
+        h = QInputDialog::getDouble(this, tr("Input Mesh Size"),tr("Mesh Size:"), h_target, 0, 100, 4, &ok);
+    } catch (const std::exception &e) {
+        std::cerr << e.what() << std::endl;
+        h = 0.05;
+    }  
+    
+    if (!ok){ 
+        std::cerr << "Not OKAY" << std::endl;
+        return;
+    }
+    h_target = h;
 }
 
 void DrawMeshArea::changeElementType(){
     bool ok;
     QStringList items;
-    items << tr("Triangles") << tr("Quadrilaterals");
+    items.append(tr("Triangles"));
+    items.append(tr("Quadrilaterals"));
 
     QString item = QInputDialog::getItem(this, tr("Select Element Type"),
-                                         tr("Element Type:"), items, 0, false, &ok);
-    if (!ok) return;
-
-    if (item == "Triangles") {
-        this->ElementType = 1;
-    } else if (item == "Quadrilaterals") {
-        this->ElementType = 2;
+                                         tr("Element Type:"), items, ElementType-1, true, &ok);
+    if (!ok) {
+        return;
     }
+    int index = items.indexOf(item);
+
+    std::cout << item.toStdString() << " " << index << std::endl;
+    int type = 0;
+    if (index == 0 ) {
+        type = 1;
+    }
+    if (index == 1) {
+        type = 2;
+    }
+    ElementType = type;
+    std::cout << "ElementType " << ElementType << std::endl;
+}
+
+void DrawMeshArea::generateMesh(){
+    clearImage();
+    mesh->generate(geo->planeTags, GmshMeshAlgorithm, ElementType, GmshRecombinationAlgorithm, h_target);
+    displayMesh();
+    hasMesh = true;
+}
+
+void DrawMeshArea::drawPoint(const QPoint &P, QImage *img){
+    if (img == nullptr) {
+        img = &image;
+    }
+    QPainter painter(img);
+    painter.setBrush(Qt::black);
+    painter.drawEllipse(P, myPenWidth, myPenWidth);
+    modified = true;
+    update();
+}
+
+void DrawMeshArea::drawPolygon(const std::vector<QPoint> &points, QImage *img) {
+    if (img == nullptr) {
+        img = &image;
+    }
+    QPainter painter(img);
+    painter.setPen(QPen(Qt::black, myPenWidth, Qt::SolidLine, Qt::RoundCap, Qt::RoundJoin));
+    painter.drawPolygon(points.data(), points.size());
+    modified = true;
+    update();
+}
+
+void DrawMeshArea::displayMesh(){
+    // first, draw all points in mesh
+    int scale = std::max(width(), height());
+    for (int i = 0; i < mesh->triMeshes.size(); i++){
+        // draw all points in the mesh
+        for (int k = 0; k < mesh->triMeshes[i].second.size(); k++){
+            QPoint p = {(int)(mesh->triMeshes[i].second[k][0]*scale), (int)((1.0-mesh->triMeshes[i].second[k][1])*scale)};
+            drawPoint(p);
+        }
+
+        // draw all triangles in the mesh
+        for (int k = 0; k < mesh->triMeshes[i].first.size(); k++){
+            std::vector<QPoint> points;
+            for (int l = 0; l < 3; l++){
+                int index = mesh->triMeshes[i].first[k][l];
+                QPoint p = {(int)(mesh->triMeshes[i].second[index][0]*scale), (int)((1.0-mesh->triMeshes[i].second[index][1])*scale)};
+                points.push_back(p);
+            }
+            drawPolygon(points);
+        }
+    }
+
+    for (int i = 0; i < mesh->quadMeshes.size(); i++){
+        // draw all points in the mesh
+        for (int k = 0; k < mesh->quadMeshes[i].second.size(); k++){
+            QPoint p = {(int)(mesh->quadMeshes[i].second[k][0]*scale), (int)((1.0-mesh->quadMeshes[i].second[k][1])*scale)};
+            drawPoint(p);
+        }
+
+        // draw all triangles in the mesh
+        for (int k = 0; k < mesh->quadMeshes[i].first.size(); k++){
+            std::vector<QPoint> points;
+            for (int l = 0; l < 4; l++){
+                int index = mesh->quadMeshes[i].first[k][l];
+                QPoint p = {(int)(mesh->quadMeshes[i].second[index][0]*scale), (int)((1.0-mesh->quadMeshes[i].second[index][1])*scale)};
+                points.push_back(p);
+            }
+            drawPolygon(points);
+        }
+    }
+
 }

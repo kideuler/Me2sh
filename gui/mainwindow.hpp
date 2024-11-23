@@ -68,7 +68,8 @@ private:
     void createSidebars();
     QTabWidget *tabWidget;
 
-    Me2sh_Geometry *geo;
+    std::shared_ptr<Me2sh_Geometry> geo;
+    std::shared_ptr<Me2sh_Mesh> mesh;
 
     QStackedWidget *sidebarStack;
     QWidget *geometrySidebar;
