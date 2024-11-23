@@ -5,8 +5,12 @@ set(CMAKE_CXX_STANDARD 17)
 
 project(
   Me2sh
-  VERSION 0.0.4
+  VERSION 0.0.5
   LANGUAGES CXX C)
+
+
+# Define the version number as a preprocessor definition
+add_definitions(-DPROJECT_VERSION="${PROJECT_VERSION}")
 
   # set build type
 if(NOT CMAKE_BUILD_TYPE)

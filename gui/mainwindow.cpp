@@ -48,7 +48,7 @@ MainWindow::MainWindow(QWidget *parent)
     createMenus();
     createSidebars();
 
-    setWindowTitle(tr("Me2sh"));
+    setWindowTitle(QString("Me2sh - Version %1").arg(PROJECT_VERSION));
     resize(1600, 800);
 
     connect(tabWidget, &QTabWidget::currentChanged, this, &MainWindow::updateSidebar);
