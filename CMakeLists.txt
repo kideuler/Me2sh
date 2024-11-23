@@ -27,14 +27,24 @@ include(CTest)
 find_package(Qt6
     REQUIRED COMPONENTS Core Gui Widgets
 )
-find_package(Gmsh REQUIRED)
+
+find_library(GMSH_LIB gmsh)
+if(NOT GMSH_LIB)
+  message(FATAL_ERROR "Could not find libgmsh")
+endif()
+
+find_path(GMSH_INC gmsh.h)
+if(NOT GMSH_INC)
+  message(FATAL_ERROR "Could not find gmsh.h")
+endif()
+include_directories(${GMSH_INC})
 
 
 # geometry library
 file( GLOB GEOMETRY_SRCS ${CMAKE_CURRENT_SOURCE_DIR}/geom/*.cpp ${CMAKE_CURRENT_SOURCE_DIR}/geom/*.hpp )
 add_library(geometry SHARED ${GEOMETRY_SRCS})
 target_include_directories(geometry PUBLIC ${CMAKE_CURRENT_SOURCE_DIR}/geom)
-target_link_libraries(geometry PUBLIC Gmsh::Gmsh)
+target_link_libraries(geometry PUBLIC ${GMSH_LIB})
 
 # meshing library
 file( GLOB MESHING_SRCS ${CMAKE_CURRENT_SOURCE_DIR}/mesh/*.cpp ${CMAKE_CURRENT_SOURCE_DIR}/mesh/*.hpp )
