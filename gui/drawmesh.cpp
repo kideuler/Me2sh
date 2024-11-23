@@ -122,14 +122,14 @@ void DrawMeshArea::drawAxisLabels(QPainter &painter)
 
     // Draw X axis labels
     for (int i = 0; i <= width(); i += width() / 10) {
-        int x = i - width();
+        int x = i;
         painter.drawText(i, height() / 2 + 15, QString::number(x/scale));
     }
 
     // Draw Y axis labels
     for (int i = 0; i <= height(); i += height() / 10) {
-        int y = height() - i;
-        painter.drawText(width() / 2 + 5, i, QString::number(y/scale));
+        int y = i;
+        painter.drawText(width() / 2 + 5, i, QString::number(1.0 - y/scale));
     }
 }
 
