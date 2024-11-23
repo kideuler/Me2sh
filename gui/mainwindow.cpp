@@ -22,8 +22,9 @@ MainWindow::MainWindow(QWidget *parent)
 { 
     geo = std::make_shared<Me2sh_Geometry>();
     mesh = std::make_shared<Me2sh_Mesh>();
-    drawGeoArea = new DrawGeoArea(geo, this);
-    drawMeshArea = new DrawMeshArea(geo, mesh, this);
+    PythonTerminal = new ConsoleOutput(this);
+    drawGeoArea = new DrawGeoArea(PythonTerminal, geo, this);
+    drawMeshArea = new DrawMeshArea(PythonTerminal, geo, mesh, this);
 
     screen = QGuiApplication::primaryScreen();
     QRect screenGeometry = screen->geometry();
@@ -34,8 +35,6 @@ MainWindow::MainWindow(QWidget *parent)
     tabWidget->addTab(drawGeoArea, tr("Geometry"));
     tabWidget->addTab(drawMeshArea, tr("Mesh"));
     tabWidget->addTab(new QWidget(), tr("Simulation"));
-
-    PythonTerminal = new ConsoleOutput(this);
 
     QSettings settings;
     int height = settings.value("Split", 600).toInt();

@@ -97,4 +97,3 @@ target_link_libraries(me2sh PRIVATE
     meshing
     ${Python3_LIBRARIES}
 )
-

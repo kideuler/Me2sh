@@ -5,9 +5,10 @@
 #include <QApplication>
 #include <QInputDialog>
 #include <QHoverEvent>
+#include <chrono>
 
-DrawMeshArea::DrawMeshArea(std::shared_ptr<Me2sh_Geometry> geometry, std::shared_ptr<Me2sh_Mesh> mesh, QWidget *parent)
-    : QWidget(parent), geo(geometry), mesh(mesh)
+DrawMeshArea::DrawMeshArea(ConsoleOutput *PyTerm, std::shared_ptr<Me2sh_Geometry> geometry, std::shared_ptr<Me2sh_Mesh> mesh, QWidget *parent)
+    : QWidget(parent), PythonTerminal(PyTerm), geo(geometry), mesh(mesh)
 {
     setAttribute(Qt::WA_StaticContents);
     setMouseTracking(true);
@@ -242,7 +243,37 @@ void DrawMeshArea::generateMesh(){
     } else {
         GmshMeshAlgorithm = QuadAlgos[QuadMeshAlgorithm];
     }
+    std::chrono::time_point<std::chrono::system_clock> start, end;
+    start = std::chrono::system_clock::now();
     mesh->generate(geo->planeTags, GmshMeshAlgorithm, ElementType, GmshRecombinationAlgorithm, h_target);
+    end = std::chrono::system_clock::now();
+    std::chrono::duration<double> elapsed_seconds = end-start;
+    PythonTerminal->printString("Mesh Generated in " + QString::number(elapsed_seconds.count()) + " seconds");
+    if (ElementType == 1){
+        int numTri = 0;
+        for (int i = 0; i < mesh->triMeshes.size(); i++){
+            numTri += mesh->triMeshes[i].first.size();
+        }
+        int numNodes = 0;
+        for (int i = 0; i < mesh->triMeshes.size(); i++){
+            numNodes += mesh->triMeshes[i].second.size();
+        }
+
+        PythonTerminal->printString("Number of Triangles: " + QString::number(numTri) + " Number of Nodes: " + QString::number(numNodes));
+    } else {
+        int numQuad = 0;
+        for (int i = 0; i < mesh->quadMeshes.size(); i++){
+            numQuad += mesh->quadMeshes[i].first.size();
+        }
+        int numNodes = 0;
+        for (int i = 0; i < mesh->quadMeshes.size(); i++){
+            numNodes += mesh->quadMeshes[i].second.size();
+        }
+
+        PythonTerminal->printString("Number of Quads: " + QString::number(numQuad) + " Number of Nodes: " + QString::number(numNodes));
+    }
+    PythonTerminal->appendPrompt();
+
     displayMesh();
     hasMesh = true;
 }

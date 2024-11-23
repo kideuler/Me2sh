@@ -142,6 +142,5 @@ void ConsoleOutput::showPreviousCommand() {
 }
 
 void ConsoleOutput::printString(const QString &text) {
-    insertPlainText(text);
-    moveCursor(QTextCursor::End);
+    executeCommand("print('" + text + "')");
 }

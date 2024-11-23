@@ -1,11 +1,11 @@
 #ifndef DRAWGEOMETRY_H
 #define DRAWGEOMETRY_H
 
+#include "ConsoleOutput.hpp"
 #include <QColor>
 #include <QImage>
 #include <QPoint>
 #include <QWidget>
-
 #include "geometry.hpp"
 
 class DrawGeoArea : public QWidget
@@ -13,7 +13,7 @@ class DrawGeoArea : public QWidget
     Q_OBJECT
 
 public:
-    DrawGeoArea(std::shared_ptr<Me2sh_Geometry> geometry, QWidget *parent = nullptr);
+    DrawGeoArea(ConsoleOutput *PyTerm, std::shared_ptr<Me2sh_Geometry> geometry, QWidget *parent = nullptr);
     void clearImage();
 
     void setPenColor(const QColor &newColor);
@@ -37,6 +37,7 @@ public:
     int penWidth() const { return myPenWidth; }
 
     std::shared_ptr<Me2sh_Geometry> geo;
+    ConsoleOutput *PythonTerminal;
 
     double h_target = 0.02;
     int max_smoothing_iters = 100;

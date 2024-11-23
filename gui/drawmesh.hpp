@@ -1,6 +1,8 @@
 #ifndef DRAWMESH_H
 #define DRAWMESH_H
 
+#include "ConsoleOutput.hpp"
+
 #include <QColor>
 #include <QImage>
 #include <QPoint>
@@ -15,13 +17,14 @@ class DrawMeshArea : public QWidget
     Q_OBJECT
 
 public:
-    DrawMeshArea(std::shared_ptr<Me2sh_Geometry> geometry, std::shared_ptr<Me2sh_Mesh> mesh, QWidget *parent = nullptr);
+    DrawMeshArea(ConsoleOutput *PyTerm, std::shared_ptr<Me2sh_Geometry> geometry, std::shared_ptr<Me2sh_Mesh> mesh, QWidget *parent = nullptr);
     void clearImage();
 
     bool isModified() const { return modified; }
 
     std::shared_ptr<Me2sh_Geometry> geo;
     std::shared_ptr<Me2sh_Mesh> mesh;
+    ConsoleOutput *PythonTerminal;
 
     bool hasMesh = false;
 

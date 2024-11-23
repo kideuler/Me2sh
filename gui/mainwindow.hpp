@@ -42,10 +42,10 @@ public:
 
     // clear screen
     void clearScreen();
-
+    ConsoleOutput *PythonTerminal;
     DrawGeoArea *drawGeoArea;
     DrawMeshArea *drawMeshArea;
-    ConsoleOutput *PythonTerminal;
+    
 
 protected:
     // Event handler for close event

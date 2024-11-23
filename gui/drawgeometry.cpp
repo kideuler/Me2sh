@@ -14,8 +14,8 @@
 #endif
 #endif
 
-DrawGeoArea::DrawGeoArea(std::shared_ptr<Me2sh_Geometry> geometry, QWidget *parent)
-    : QWidget(parent), geo(geometry)
+DrawGeoArea::DrawGeoArea(ConsoleOutput *PyTerm, std::shared_ptr<Me2sh_Geometry> geometry, QWidget *parent)
+    : QWidget(parent), PythonTerminal(PyTerm), geo(geometry)
 {
     setAttribute(Qt::WA_StaticContents);
     setMouseTracking(true);
@@ -66,6 +66,15 @@ void DrawGeoArea::mousePressEvent(QMouseEvent *event)
             double centerX = (double)event->position().x() / scale;
             double centerY = 1.0 - (double)event->position().y() / scale;
             geo->addEllipse(centerX, centerY, rx, ry);
+
+            // output plane tag
+            if (rx == ry){
+                PythonTerminal->printString("Added Circle with Plane Tag: " + QString::number(geo->planeTags.back()));
+            } else {
+                PythonTerminal->printString("Added Ellipse with Plane Tag: " + QString::number(geo->planeTags.back()));
+            }
+            PythonTerminal->appendPrompt();
+
             drawShape();
             selectingCenter = false;
             clearTemporaryLayer();
@@ -76,6 +85,11 @@ void DrawGeoArea::mousePressEvent(QMouseEvent *event)
             double centerX = (double)event->position().x() / scale;
             double centerY = 1.0 - (double)event->position().y() / scale;
             geo->addRectangle(centerX, centerY, rx, ry);
+
+            // output plane tag
+            PythonTerminal->printString("Added Rectangle with Plane Tag: " + QString::number(geo->planeTags.back()));
+            PythonTerminal->appendPrompt();
+
             drawShape();
             selectingRect = false;
             clearTemporaryLayer();
@@ -282,6 +296,10 @@ void DrawGeoArea::drawSpline(){
     if (geo->points.size()-geo->firstPointIndex <= 1){return;}
     geo->addSpline(geo->firstPointIndex, geo->points.size());
 
+    // output plane tag
+    PythonTerminal->printString("Added Spline with Plane Tag: " + QString::number(geo->planeTags.back()));
+    PythonTerminal->appendPrompt();
+
     drawShape();
     clearTemporaryLayer();
 }
@@ -289,6 +307,10 @@ void DrawGeoArea::drawSpline(){
 void DrawGeoArea::drawBSpline(){
     if (geo->points.size()-geo->firstPointIndex <= 1){return;}
     geo->addBSpline(geo->firstPointIndex, geo->points.size());
+
+    // output plane tag
+    PythonTerminal->printString("Added B-Spline with Plane Tag: " + QString::number(geo->planeTags.back()));
+    PythonTerminal->appendPrompt();
 
     drawShape();
     clearTemporaryLayer();
@@ -348,6 +370,13 @@ void DrawGeoArea::drawRectangle() {
 
 void DrawGeoArea::FuseAll(){
     geo->FuseOverlapping(exterior_geom);
+
+    // output plane tags
+    for (int i = 0; i < geo->planeTags.size(); i++){
+        PythonTerminal->printString("Created Fused Plane with Tag: " + QString::number(geo->planeTags[i]));
+    }
+    PythonTerminal->appendPrompt();
+
     tempImage.fill(Qt::transparent);
     image.fill(qRgb(255, 255, 255));
     drawgeometry();
@@ -375,6 +404,12 @@ void DrawGeoArea::MakeExteriorGeometry(){
 
     exterior_geom = true;
     MakeExteriorRectangle();
+
+    // output plane tags
+    for (int i = 0; i < geo->planeTags.size(); i++){
+        PythonTerminal->printString("Created Exterior Plane with Tag: " + QString::number(geo->planeTags[i]));
+    }
+    PythonTerminal->appendPrompt();
 }
 
 void DrawGeoArea::drawAxis(QPainter &painter)
