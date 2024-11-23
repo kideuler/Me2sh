@@ -56,7 +56,9 @@ target_link_libraries(meshing PUBLIC geometry)
 # adding tests
 add_subdirectory(test)
 
-qt_standard_project_setup()
+set(CMAKE_AUTOMOC ON) 
+set(CMAKE_AUTORCC ON) 
+set(CMAKE_AUTOUIC ON)
 
 # Glob all gui files together
 file( GLOB GUI_SRCS ${CMAKE_CURRENT_SOURCE_DIR}/gui/*.cpp ${CMAKE_CURRENT_SOURCE_DIR}/gui/*.hpp )
