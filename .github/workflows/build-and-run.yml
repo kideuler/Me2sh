@@ -65,7 +65,7 @@ jobs:
         # Install the latest version of Gmsh from the official website
         wget -q -O - https://gmsh.info/bin/Linux/gmsh-4.13.1-Linux64-sdk.tgz | tar -xz -C /tmp
         sudo cp /tmp/gmsh-4.13.1-Linux64-sdk/bin/gmsh /usr/local/bin/
-        sudo cp -r /tmp/gmsh-4.13.1-Linux64-sdk/lib/* /usr/local/lib/x86_64-linux-gnu/
+        sudo cp -r /tmp/gmsh-4.13.1-Linux64-sdk/lib/* /usr/local/lib/
         sudo cp -r /tmp/gmsh-4.13.1-Linux64-sdk/include/* /usr/local/include/
 
     - name: Configure CMake
