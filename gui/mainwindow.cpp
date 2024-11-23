@@ -166,6 +166,10 @@ void MainWindow::createSidebars()
     meshLayout->addWidget(changeElementTypeButton);
     connect(changeElementTypeButton, &QPushButton::clicked, drawMeshArea, &DrawMeshArea::changeElementType);
 
+    QPushButton *changeMeshAlgorithmButton = new QPushButton(tr("Change Mesh Algorithm"), this);
+    meshLayout->addWidget(changeMeshAlgorithmButton);
+    connect(changeMeshAlgorithmButton, &QPushButton::clicked, drawMeshArea, &DrawMeshArea::changeMeshAlgorithm);
+
     QFrame *line_mesh2 = new QFrame(this);
     line_mesh->setFrameShape(QFrame::HLine);
     line_mesh->setFrameShadow(QFrame::Sunken);

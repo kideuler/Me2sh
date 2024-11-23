@@ -10,25 +10,25 @@ void Create_circle_coords(Me2sh_Geometry &geo, int npoints) {
     }
 }
 
-TEST(createCircle, geomTest) {
+TEST(geomTest,createCircle) {
     Me2sh_Geometry geo;
     geo.addEllipse(0.5,0.5,0.2,0.2);
     gmsh::model::mesh::generate(2);
 }
 
-TEST(createEllipse, geomTest) {
+TEST(geomTest,createEllipse) {
     Me2sh_Geometry geo;
     geo.addEllipse(0.5,0.5,0.3,0.2);
     gmsh::model::mesh::generate(2);
 }
 
-TEST(createRectangle, geomTest) {
+TEST(geomTest,createRectangle) {
     Me2sh_Geometry geo;
     geo.addRectangle(0.5,0.5,0.3,0.2);
     gmsh::model::mesh::generate(2);
 }
 
-TEST(createSpline, geomTest) {
+TEST(geomTest,createSpline) {
     int np = 100;
     Me2sh_Geometry geo;
     Create_circle_coords(geo, np);
@@ -36,11 +36,28 @@ TEST(createSpline, geomTest) {
     gmsh::model::mesh::generate(2);
 }
 
-TEST(createBSpline, geomTest) {
+TEST(geomTest,createBSpline) {
     int np = 100;
     Me2sh_Geometry geo;
     Create_circle_coords(geo, np);
     geo.addBSpline(0, np);
+    gmsh::model::mesh::generate(2);
+}
+
+TEST(geomTest,FuseOverlapping){
+    Me2sh_Geometry geo;
+    geo.addEllipse(0.5,0.5,0.1,0.1);
+    geo.addEllipse(0.55,0.5,0.1,0.1);
+    geo.addEllipse(0.7,0.5,0.2,0.1);
+    geo.FuseOverlapping();
+    gmsh::model::mesh::generate(2);
+}
+
+TEST(geomTest,MakeRectangleAndCut){
+    Me2sh_Geometry geo;
+    geo.addEllipse(0.5,0.5,0.1,0.1);
+    geo.addEllipse(0.55,0.5,0.1,0.1);
+    geo.MakeRectangleAndCut(0.5,0.5,0.5,0.5);
     gmsh::model::mesh::generate(2);
 }
 

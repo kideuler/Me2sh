@@ -46,6 +46,7 @@ void DrawGeoArea::clearImage()
     image.fill(qRgb(255, 255, 255));
     clearTemporaryLayer();
     modified = true;
+    exterior_geom = false;
     geo->clear();
     update();
 }
@@ -346,7 +347,7 @@ void DrawGeoArea::drawRectangle() {
 }
 
 void DrawGeoArea::FuseAll(){
-    geo->FuseOverlapping();
+    geo->FuseOverlapping(exterior_geom);
     tempImage.fill(Qt::transparent);
     image.fill(qRgb(255, 255, 255));
     drawgeometry();
@@ -362,8 +363,11 @@ void DrawGeoArea::MakeExteriorRectangle(){
     double h = (double)height()/scale;
     double cy = 1.0 - h/2.0;
     double dy = 1.0 - cy;
-    geo->MakeRectangleAndCut(cx, cy, dx-0.01, dy-0.01);
-    drawShape();
+    geo->MakeRectangleAndCut(cx, cy, dx-0.005, dy-0.005);
+    tempImage.fill(Qt::transparent);
+    image.fill(qRgb(255, 255, 255));
+    drawgeometry();
+    clearTemporaryLayer();
 }
 
 void DrawGeoArea::MakeExteriorGeometry(){

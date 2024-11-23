@@ -123,6 +123,44 @@ void Me2sh_Geometry::MakeRectangleAndCut(double x, double y, double lx, double l
 
     // cutting the other geometries out of the rectangle
     ExteriorTag = planetag;
+    gmsh::vectorpair s;
+    gmsh::vectorpair s1;
+    gmsh::vectorpair s2;
+    gmsh::vectorpair c1;
+
+    for (int i = 0; i<planeTags.size(); i++){
+        if (planeTags[i] == planetag){continue;}
+        s.push_back({2, planeTags[i]});
+    }
+    s1.push_back({2, planetag});
+    std::vector<gmsh::vectorpair> outDimTagsMap;
+    std::vector<int> newPlanetags;
+    std::vector<int> newCurvetags;
+
+    gmsh::model::occ::cut(s1, s, s2, outDimTagsMap);
+    gmsh::model::occ::removeAllDuplicates();
+    gmsh::model::occ::synchronize();
+
+    gmsh::model::getEntities(c1, 1);
+    gmsh::model::getEntities(s1, 2);
+    
+    for (int i = 0; i < c1.size(); i++){
+        if (c1[i].first == 1){
+            newCurvetags.push_back(c1[i].second);
+        }
+    }
+
+    for (int i = 0; i < s1.size(); i++){
+        newPlanetags.push_back(s1[i].second);
+    }
+    curveTags = newCurvetags;
+    planeTags = newPlanetags;
+    gmsh::model::occ::synchronize();
+    if (planeTags.size() == 1){
+        ExteriorTag = planeTags[0];
+    } else {
+        std::cerr << "Error: More than one exterior tag after cutting" << std::endl;
+    }
 }
 
 void Me2sh_Geometry::addSpline(int istart, int iend){
@@ -215,44 +253,83 @@ void Me2sh_Geometry::addBSpline(int istart, int iend){
     }
 }
 
-void Me2sh_Geometry::FuseOverlapping(){
+void Me2sh_Geometry::FuseOverlapping(bool exterior){
     gmsh::model::occ::synchronize();
 
-    gmsh::vectorpair c1;
-    gmsh::vectorpair s1;
-    gmsh::vectorpair s2;
-    gmsh::vectorpair s3;
-    std::vector<gmsh::vectorpair> outDimTagsMap;
+    if (!exterior){
+        gmsh::vectorpair c1;
+        gmsh::vectorpair s1;
+        gmsh::vectorpair s2;
+        gmsh::vectorpair s3;
+        std::vector<gmsh::vectorpair> outDimTagsMap;
 
-    std::vector<int> newPlanetags;
-    std::vector<int> newCurvetags;
+        std::vector<int> newPlanetags;
+        std::vector<int> newCurvetags;
 
-    gmsh::model::getEntities(s1, 2);
-    gmsh::model::getEntities(s2, 2);
+        gmsh::model::getEntities(s1, 2);
+        gmsh::model::getEntities(s2, 2);
 
-    gmsh::model::occ::fuse(s1, s2, s3, outDimTagsMap);
-    gmsh::model::occ::removeAllDuplicates();
-    gmsh::model::occ::synchronize();
+        gmsh::model::occ::fuse(s1, s2, s3, outDimTagsMap);
+        gmsh::model::occ::removeAllDuplicates();
+        gmsh::model::occ::synchronize();
 
-    gmsh::model::getEntities(c1, 1);
-    gmsh::model::getEntities(s1, 2);
-    
+        gmsh::model::getEntities(c1, 1);
+        gmsh::model::getEntities(s1, 2);
+        
 
-    for (int i = 0; i < c1.size(); i++){
-        if (c1[i].first == 1){
-            newCurvetags.push_back(c1[i].second);
+        for (int i = 0; i < c1.size(); i++){
+            if (c1[i].first == 1){
+                newCurvetags.push_back(c1[i].second);
+            }
+        }
+
+        for (int i = 0; i < s1.size(); i++){
+            newPlanetags.push_back(s1[i].second);
+        }
+        curveTags = newCurvetags;
+        planeTags = newPlanetags;
+        gmsh::model::occ::synchronize();
+        return;
+    } else {
+        gmsh::vectorpair s;
+        gmsh::vectorpair s1;
+        gmsh::vectorpair s2;
+        gmsh::vectorpair c1;
+
+        for (int i = 0; i<planeTags.size(); i++){
+            if (planeTags[i] == ExteriorTag){continue;}
+            s.push_back({2, planeTags[i]});
+        }
+        s1.push_back({2, ExteriorTag});
+        std::vector<gmsh::vectorpair> outDimTagsMap;
+        std::vector<int> newPlanetags;
+        std::vector<int> newCurvetags;
+
+        gmsh::model::occ::cut(s1, s, s2, outDimTagsMap);
+        gmsh::model::occ::removeAllDuplicates();
+        gmsh::model::occ::synchronize();
+
+        gmsh::model::getEntities(c1, 1);
+        gmsh::model::getEntities(s1, 2);
+        
+        for (int i = 0; i < c1.size(); i++){
+            if (c1[i].first == 1){
+                newCurvetags.push_back(c1[i].second);
+            }
+        }
+
+        for (int i = 0; i < s1.size(); i++){
+            newPlanetags.push_back(s1[i].second);
+        }
+        curveTags = newCurvetags;
+        planeTags = newPlanetags;
+        gmsh::model::occ::synchronize();
+        if (planeTags.size() == 1){
+            ExteriorTag = planeTags[0];
+        } else {
+            std::cerr << "Error: More than one exterior tag after cutting" << std::endl;
         }
     }
-
-    for (int i = 0; i < s1.size(); i++){
-        newPlanetags.push_back(s1[i].second);
-    }
-    curveTags = newCurvetags;
-    planeTags = newPlanetags;
-    gmsh::model::occ::synchronize();
-
-    
-        
 }
 
 #ifdef USE_GEO

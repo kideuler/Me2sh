@@ -29,6 +29,7 @@ public:
 
     void chanegeMeshSize();
     void changeElementType();
+    void changeMeshAlgorithm();
 
     void generateMesh();
 
@@ -36,6 +37,8 @@ public:
 
     double h_target = 0.01;
     int GmshMeshAlgorithm = 6;
+    int TriMeshAlgorithm = 0;
+    int QuadMeshAlgorithm = 0;
     int GmshRecombinationAlgorithm = 3;
     int ElementType = 1;
 

@@ -5,15 +5,23 @@ set(CMAKE_CXX_STANDARD 17)
 
 project(
   Me2sh
-  VERSION 0.0.3
+  VERSION 0.0.4
   LANGUAGES CXX C)
 
+  # set build type
+if(NOT CMAKE_BUILD_TYPE)
+set(CMAKE_BUILD_TYPE Release)
+endif()
 
+# Enable sanitizers if build type is Debug
+if(CMAKE_BUILD_TYPE STREQUAL "Debug")
+message(STATUS "Sanitizers enabled for Debug build")
+set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -fsanitize=address,undefined")
+set(CMAKE_LINKER_FLAGS "${CMAKE_LINKER_FLAGS} -fsanitize=address,undefined")
+endif()
 
 
 include(CTest)
-
-# set build type
 
 # Find all necessary libraries
 find_package(Qt6

@@ -199,8 +199,48 @@ void DrawMeshArea::changeElementType(){
     std::cout << "ElementType " << ElementType << std::endl;
 }
 
+void DrawMeshArea::changeMeshAlgorithm(){
+    bool ok;
+    QStringList items_tri;
+    items_tri.append(tr("Frontal-Delaunay"));
+    items_tri.append(tr("Delaunay"));
+    
+    QStringList items_quad;
+    items_quad.append(tr("Blossom"));
+    items_quad.append(tr("Frontal-Delaunay for Quads"));
+    items_quad.append(tr("Packing-Parallellelogram"));
+    items_quad.append(tr("Crossfield"));
+
+    QString item;
+    if (ElementType == 1){
+        item = QInputDialog::getItem(this, tr("Select Mesh Algorithm"),
+                                         tr("Mesh Algorithm:"), items_tri, GmshMeshAlgorithm-5, true, &ok);
+    } else {
+        item = QInputDialog::getItem(this, tr("Select Mesh Algorithm"),
+                                         tr("Mesh Algorithm:"), items_quad, GmshMeshAlgorithm-5, true, &ok);
+    }
+    if (!ok) {
+        return;
+    }
+    if (ElementType == 1){
+        int index = items_tri.indexOf(item);
+        TriMeshAlgorithm = index;
+    } else {
+        int index = items_quad.indexOf(item);
+        QuadMeshAlgorithm = index;
+    }
+
+}
+
 void DrawMeshArea::generateMesh(){
     clearImage();
+    int TriAlgos[2] = {6,5};
+    int QuadAlgos[4] = {6,8,9,11};
+    if (ElementType == 1){
+        GmshMeshAlgorithm = TriAlgos[TriMeshAlgorithm];
+    } else {
+        GmshMeshAlgorithm = QuadAlgos[QuadMeshAlgorithm];
+    }
     mesh->generate(geo->planeTags, GmshMeshAlgorithm, ElementType, GmshRecombinationAlgorithm, h_target);
     displayMesh();
     hasMesh = true;
