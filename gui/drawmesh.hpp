@@ -5,6 +5,7 @@
 
 #include <QColor>
 #include <QImage>
+#include <QTimer>
 #include <QPoint>
 #include <QWidget>
 #include <memory>
@@ -19,6 +20,8 @@ class DrawMeshArea : public QWidget
 public:
     DrawMeshArea(ConsoleOutput *PyTerm, std::shared_ptr<Me2sh_Geometry> geometry, std::shared_ptr<Me2sh_Mesh> mesh, QWidget *parent = nullptr);
     void clearImage();
+
+    void startAnimation();
 
     bool isModified() const { return modified; }
 
@@ -37,6 +40,7 @@ public:
     void generateMesh();
 
     void displayMesh();
+    void ShowMeshColorGradient();
 
     double h_target = 0.01;
     int GmshMeshAlgorithm = 6;
@@ -50,6 +54,10 @@ public slots:
 protected:
     void paintEvent(QPaintEvent *event) override;
     void resizeEvent(QResizeEvent *event) override;
+
+private slots:
+    void updateAnimation();
+
 private:
     void resizeImage(QImage *image, const QSize &newSize);
     void drawShape();
@@ -69,6 +77,9 @@ private:
     bool firstpointinit = false;
     QColor myPenColor = Qt::black; 
     int myPenWidth = 1;
+
+    QTimer *animationTimer;
+    double animationPhase = 0.0;
 };
 
 #endif

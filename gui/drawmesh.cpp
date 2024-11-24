@@ -2,13 +2,14 @@
 
 #include <QMouseEvent>
 #include <QPainter>
+#include <QLinearGradient>
 #include <QApplication>
 #include <QInputDialog>
 #include <QHoverEvent>
 #include <chrono>
 
 DrawMeshArea::DrawMeshArea(ConsoleOutput *PyTerm, std::shared_ptr<Me2sh_Geometry> geometry, std::shared_ptr<Me2sh_Mesh> mesh, QWidget *parent)
-    : QWidget(parent), PythonTerminal(PyTerm), geo(geometry), mesh(mesh)
+    : QWidget(parent), PythonTerminal(PyTerm), geo(geometry), mesh(mesh), animationPhase(0.0)
 {
     setAttribute(Qt::WA_StaticContents);
     setMouseTracking(true);
@@ -17,6 +18,15 @@ DrawMeshArea::DrawMeshArea(ConsoleOutput *PyTerm, std::shared_ptr<Me2sh_Geometry
     image.fill(qRgb(255, 255, 255));
     tempImage = QImage(size(), QImage::Format_ARGB32_Premultiplied);
     tempImage.fill(Qt::transparent);
+
+    // Set up the animation timer
+    animationTimer = new QTimer(this);
+    connect(animationTimer, &QTimer::timeout, this, &DrawMeshArea::updateAnimation);
+}
+
+void DrawMeshArea::startAnimation()
+{
+    animationTimer->start(16); // Update at ~60 FPS
 }
 
 void DrawMeshArea::clearImage()
@@ -341,4 +351,67 @@ void DrawMeshArea::displayMesh(){
         }
     }
 
+}
+
+void DrawMeshArea::updateAnimation() {
+    animationPhase += 0.1; // Increment the phase for the wave
+    if (animationPhase > 2 * M_PI) {
+        animationPhase -= 2 * M_PI;
+    }
+    ShowMeshColorGradient();
+}
+
+void DrawMeshArea::ShowMeshColorGradient() {
+    if (mesh->triMeshes.empty()) return;
+
+    tempImage.fill(Qt::transparent);
+    image.fill(qRgb(255, 255, 255));
+    update();
+
+    QPainter painter(&image);
+    painter.setRenderHint(QPainter::Antialiasing);
+
+    // Find the min and max x coordinates to normalize the gradient
+    int minX = std::numeric_limits<int>::max();
+    int maxX = std::numeric_limits<int>::lowest();
+    int scale = std::max(width(), height());
+    for (const auto &v : mesh->triMeshes[0].second) {
+        QPoint node = {(int)(v[0]*scale), (int)((1.0 - v[1])*scale)};
+        if (node.x() < minX) minX = node.x();
+        if (node.x() > maxX) maxX = node.x();
+    }
+
+    // Draw each triangle with a color gradient
+    for (const auto &triangle : mesh->triMeshes[0].first) {
+        QPolygon polygon;
+        QVector<QColor> colors;
+
+        for (const auto &index : triangle) {
+            const auto &v = mesh->triMeshes[0].second[index];
+            QPoint node = {(int)(v[0]*scale), (int)((1.0 - v[1])*scale)};
+            
+            polygon << node;
+            
+            // Normalize the x coordinate to [0, 1]
+            double normalizedX = double(node.x() - minX) / double(maxX - minX);
+
+            // Apply a sine wave to the normalized x coordinate
+            double wave = 0.5 * (1 + std::sin(normalizedX * 2 * M_PI + animationPhase));
+
+            // Interpolate color from red to blue
+            int c1 = static_cast<int>(255 * (1 - wave));
+            int c2 = static_cast<int>(255 * wave);
+            QColor color(c1, c2, 0);
+            colors << color;
+        }
+
+        // Create a gradient for the triangle
+        QLinearGradient gradient(polygon.boundingRect().topLeft(), polygon.boundingRect().bottomRight());
+        gradient.setColorAt(0.0, colors[0]);
+        gradient.setColorAt(0.5, colors[1]);
+        gradient.setColorAt(1.0, colors[2]);
+
+        painter.setBrush(gradient);
+        painter.drawPolygon(polygon);
+    }
 }

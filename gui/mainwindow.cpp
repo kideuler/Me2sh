@@ -270,6 +270,13 @@ void MainWindow::createActions()
     aboutQtAct = new QAction(tr("About &Qt"), this);
     connect(aboutQtAct, &QAction::triggered, qApp, &QApplication::aboutQt);
 
+    colorAct = new QAction(tr("Color Mesh with Gradient"), this); // remove in future
+    colorAct->setShortcut(tr("Ctrl+G"));
+    connect(colorAct, &QAction::triggered, drawMeshArea, &DrawMeshArea::ShowMeshColorGradient);
+
+    animateAct = new QAction(tr("Animate"), this); // remove in future
+    animateAct->setShortcut(tr("Ctrl+D"));
+    connect(animateAct, &QAction::triggered, drawMeshArea, &DrawMeshArea::startAnimation);
 }
 
 void MainWindow::createMenus()
@@ -280,6 +287,9 @@ void MainWindow::createMenus()
     optionMenu->addAction(penWidthAct);
     optionMenu->addSeparator();
     optionMenu->addAction(clearAct);
+
+    optionMenu->addAction(colorAct); // temporary remove in future
+    optionMenu->addAction(animateAct); // temporary remove in future
 
     // help menu
     helpMenu = new QMenu(tr("&Help"), this);

@@ -41,15 +41,6 @@ jobs:
       run: |
         echo "build-output-dir=${{ github.workspace }}/build" >> "$GITHUB_OUTPUT"
 
-    - name: Cache Homebrew (macOS only)
-      if: matrix.os == 'macos-latest'
-      uses: actions/cache@v2
-      with:
-        path: /opt/homebrew
-        key: ${{ runner.os }}-brew-${{ hashFiles('**/Brewfile') }}
-        restore-keys: |
-          ${{ runner.os }}-brew-
-
     - name: Install Homebrew (macOS only)
       if: matrix.os == 'macos-latest'
       run: |
@@ -66,15 +57,6 @@ jobs:
         brew install gmsh
         brew install googletest
         brew install mfem
-
-    - name: Cache apt packages (Ubuntu only)
-      if: matrix.os == 'ubuntu-latest'
-      uses: actions/cache@v2
-      with:
-        path: /usr/local/lib
-        key: ${{ runner.os }}-apt-${{ hashFiles('**/apt-packages.txt') }}
-        restore-keys: |
-          ${{ runner.os }}-apt-
 
     - name: Install dependencies with apt-get (Ubuntu only)
       if: matrix.os == 'ubuntu-latest'
@@ -101,6 +83,8 @@ jobs:
       run: |
         eval $(/home/linuxbrew/.linuxbrew/bin/brew shellenv)
         brew install mfem
+        sudo cp -r /home/linuxbrew/.linuxbrew/Cellar/mfem/*/lib/* /usr/local/lib/
+        sudo cp -r /home/linuxbrew/.linuxbrew/Cellar/mfem/*/include/* /usr/local/include/
 
     - name: Configure CMake
       # Configure CMake in a 'build' subdirectory. `CMAKE_BUILD_TYPE` is only required if you are using a single-configuration generator such as make.

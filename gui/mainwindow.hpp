@@ -95,6 +95,10 @@ private:
     QAction *aboutQtAct;
     QAction *clearAct;
 
+
+    QAction *colorAct; // temporary remove in future
+    QAction *animateAct; // temporary remove in future
+
     QScreen *screen;
 
     int screenWidth;

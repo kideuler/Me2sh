@@ -69,7 +69,7 @@ void Me2sh_Mesh::generate(std::vector<int> PlaneTags, int MeshAlgo, int ElementT
             triMeshes[i].second.resize(num_nodes);
             std::size_t nnodes;
             gmsh::model::mesh::getMaxNodeTag(nnodes);
-            map.resize(nnodes);
+            map.resize(nnodes+1);
             for (int j = 0; j < num_nodes; j++){
                triMeshes[i].second[j] = {Coords[3*j], Coords[3*j+1]};
                map[nodeTags[j]] = j;
@@ -87,7 +87,7 @@ void Me2sh_Mesh::generate(std::vector<int> PlaneTags, int MeshAlgo, int ElementT
             quadMeshes[i].second.resize(num_nodes);
             std::size_t nnodes;
             gmsh::model::mesh::getMaxNodeTag(nnodes);
-            map.resize(nnodes);
+            map.resize(nnodes+1);
             for (int j = 0; j < num_nodes; j++){
                quadMeshes[i].second[j] = {Coords[3*j], Coords[3*j+1]};
                map[nodeTags[j]] = j;
