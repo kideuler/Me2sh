@@ -82,10 +82,6 @@ jobs:
       run: |
         eval $(/home/linuxbrew/.linuxbrew/bin/brew shellenv)
         brew install mfem
-        sudo ls /home/linuxbrew/.linuxbrew/Cellar/
-        sudo ls /home/linuxbrew/.linuxbrew/Cellar/mfem/*/
-        sudo ls /home/linuxbrew/.linuxbrew/Cellar/mfem/*/lib/
-        sudo ls /home/linuxbrew/.linuxbrew/Cellar/mfem/*/include/
         sudo cp -r /home/linuxbrew/.linuxbrew/Cellar/mfem/*/lib/* /usr/local/lib/
         sudo cp -r /home/linuxbrew/.linuxbrew/Cellar/mfem/*/include/* /usr/local/include/
 
@@ -107,7 +103,7 @@ jobs:
         -DCMAKE_CXX_COMPILER=${{ matrix.cpp_compiler }}
         -DCMAKE_C_COMPILER=${{ matrix.c_compiler }}
         -DCMAKE_BUILD_TYPE=${{ matrix.build_type }}
-        -DCMAKE_PREFIX_PATH="/home/linuxbrew/.linuxbrew/Cellar/mfem/*/lib/cmake"
+        -DCMAKE_PREFIX_PATH=/home/linuxbrew/.linuxbrew/Cellar/mfem/*/lib/cmake/mfem
         -S ${{ github.workspace }}
 
     - name: Build
