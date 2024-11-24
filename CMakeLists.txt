@@ -54,7 +54,16 @@ include_directories(${GMSH_INC})
 
 
 # find mfem
-find_library(mfem REQUIRED NAMES MFEM)
+find_library(MFEM_LIBRARIES mfem)
+if(NOT MFEM_LIBRARIES)
+  message(FATAL_ERROR "Could not find libmfem")
+endif()
+find_path(MFEM_INCLUDE_DIRS mfem.hpp)
+if(NOT MFEM_INCLUDE_DIRS)
+  message(FATAL_ERROR "Could not find mfem.hpp")
+endif()
+message(STATUS "found mfem at MFEM_INCLUDE_DIRS: ${MFEM_INCLUDE_DIRS}, MFEM_LIBRARIES: ${MFEM_LIBRARIES}")
+# find_library(mfem REQUIRED NAMES MFEM)
 include_directories(${MFEM_INCLUDE_DIRS})
 
 # geometry library
