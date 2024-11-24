@@ -85,7 +85,7 @@ jobs:
         sudo cp -r /home/linuxbrew/.linuxbrew/Cellar/mfem/*/lib/* /usr/local/lib/
         sudo cp -r /home/linuxbrew/.linuxbrew/Cellar/mfem/*/include/* /usr/local/include/
 
-    - name: Configure CMake
+    - name: Configure CMake (macOS only)
       if: matrix.os == 'macos-latest'
       # Configure your program with the given configuration.
       run: >
@@ -95,6 +95,7 @@ jobs:
         -DCMAKE_BUILD_TYPE=${{ matrix.build_type }}
         -S ${{ github.workspace }}
 
+    - name: Configure CMake (Ubuntu only)
       if: matrix.os == 'ubuntu-latest'
       # Configure your program with the given configuration.
       run: >
