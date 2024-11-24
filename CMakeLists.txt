@@ -86,7 +86,15 @@ set(CMAKE_AUTORCC ON)
 set(CMAKE_AUTOUIC ON)
 
 # Glob all gui files together
-file( GLOB GUI_SRCS ${CMAKE_CURRENT_SOURCE_DIR}/gui/*.cpp ${CMAKE_CURRENT_SOURCE_DIR}/gui/*.hpp )
+file( GLOB GUI_SRCS 
+    ${CMAKE_CURRENT_SOURCE_DIR}/gui/*.cpp 
+    ${CMAKE_CURRENT_SOURCE_DIR}/gui/*.hpp 
+    ${CMAKE_CURRENT_SOURCE_DIR}/gui/geom/*.cpp 
+    ${CMAKE_CURRENT_SOURCE_DIR}/gui/geom/*.hpp
+    ${CMAKE_CURRENT_SOURCE_DIR}/gui/mesh/*.cpp 
+    ${CMAKE_CURRENT_SOURCE_DIR}/gui/mesh/*.hpp
+    ${CMAKE_CURRENT_SOURCE_DIR}/gui/etc/*.cpp 
+    ${CMAKE_CURRENT_SOURCE_DIR}/gui/etc/*.hpp )
 
 set_source_files_properties(${CMAKE_CURRENT_SOURCE_DIR}/resources/me2sh_hummingbird_1.icns PROPERTIES MACOSX_PACKAGE_LOCATION "Resources")
 
@@ -105,7 +113,11 @@ set_target_properties(me2sh PROPERTIES
 
 target_include_directories(me2sh PUBLIC
     ${CMAKE_CURRENT_SOURCE_DIR}/geom
+    ${CMAKE_CURRENT_SOURCE_DIR}/mesh
     ${CMAKE_CURRENT_SOURCE_DIR}/gui
+    ${CMAKE_CURRENT_SOURCE_DIR}/gui/geom
+    ${CMAKE_CURRENT_SOURCE_DIR}/gui/mesh
+    ${CMAKE_CURRENT_SOURCE_DIR}/gui/etc
     ${Python3_INCLUDE_DIRS}
 )
 
