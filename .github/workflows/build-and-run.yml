@@ -65,6 +65,7 @@ jobs:
         brew install qt@6
         brew install gmsh
         brew install googletest
+        brew install mfem
 
     - name: Cache apt packages (Ubuntu only)
       if: matrix.os == 'ubuntu-latest'
@@ -79,12 +80,27 @@ jobs:
       if: matrix.os == 'ubuntu-latest'
       run: |
         sudo apt-get update
-        sudo apt-get install -y python3 cmake libglx-dev libgl1-mesa-dev qt6-base-dev libgtest-dev libxi-dev libxmu-dev libglu1-mesa-dev
+        sudo apt-get install -y python3 cmake libglx-dev libgl1-mesa-dev qt6-base-dev libgtest-dev libxi-dev libxmu-dev libglu1-mesa-dev 
         # Install the latest version of Gmsh from the official website
         wget -q -O - https://gmsh.info/bin/Linux/gmsh-4.13.1-Linux64-sdk.tgz | tar -xz -C /tmp
         sudo cp /tmp/gmsh-4.13.1-Linux64-sdk/bin/gmsh /usr/local/bin/
         sudo cp -r /tmp/gmsh-4.13.1-Linux64-sdk/lib/* /usr/local/lib/
         sudo cp -r /tmp/gmsh-4.13.1-Linux64-sdk/include/* /usr/local/include/
+
+    - name: Install Homebrew (Ubuntu only)
+      if: matrix.os == 'ubuntu-latest'
+      run: |
+        sudo apt-get install -y build-essential curl file git
+        sh -c "$(curl -fsSL https://raw.githubusercontent.com/Linuxbrew/install/master/install.sh)"
+        echo 'eval $(/home/linuxbrew/.linuxbrew/bin/brew shellenv)' >>~/.profile
+        eval $(/home/linuxbrew/.linuxbrew/bin/brew shellenv)
+        brew install gcc
+
+    - name: Install MFEM with Homebrew (Ubuntu only)
+      if: matrix.os == 'ubuntu-latest'
+      run: |
+        eval $(/home/linuxbrew/.linuxbrew/bin/brew shellenv)
+        brew install mfem
 
     - name: Configure CMake
       # Configure CMake in a 'build' subdirectory. `CMAKE_BUILD_TYPE` is only required if you are using a single-configuration generator such as make.

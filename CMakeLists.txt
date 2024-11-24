@@ -27,13 +27,19 @@ endif()
 
 include(CTest)
 
-# Find all necessary libraries
+# Find qt6
 find_package(Qt6
     REQUIRED COMPONENTS Core Gui Widgets
 )
 
+# finding python
 find_package(Python3 REQUIRED COMPONENTS Interpreter Development)
 
+# Include Python headers and libraries
+include_directories(${Python3_INCLUDE_DIRS})
+link_directories(${Python3_LIBRARY_DIRS})
+
+# finding gmsh
 find_library(GMSH_LIB gmsh)
 if(NOT GMSH_LIB)
   message(FATAL_ERROR "Could not find libgmsh")
@@ -46,9 +52,10 @@ endif()
 message(STATUS "found gmsh at GMSH_INC: ${GMSH_INC}, GMSH_LIB: ${GMSH_LIB}")
 include_directories(${GMSH_INC})
 
-# Include Python headers and libraries
-include_directories(${Python3_INCLUDE_DIRS})
-link_directories(${Python3_LIBRARY_DIRS})
+
+# find mfem
+find_library(mfem REQUIRED NAMES MFEM)
+include_directories(${MFEM_INCLUDE_DIRS})
 
 # geometry library
 file( GLOB GEOMETRY_SRCS ${CMAKE_CURRENT_SOURCE_DIR}/geom/*.cpp ${CMAKE_CURRENT_SOURCE_DIR}/geom/*.hpp )
@@ -100,4 +107,5 @@ target_link_libraries(me2sh PRIVATE
     geometry
     meshing
     ${Python3_LIBRARIES}
+    ${MFEM_LIBRARIES}
 )
