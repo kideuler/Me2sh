@@ -43,7 +43,6 @@ void DrawMeshArea::clearImage()
 void DrawMeshArea::clearTemporaryLayer()
 {
     tempImage.fill(Qt::transparent); // Clear only the temporary image
-    geo->cleartemp();
     update();
 }
 

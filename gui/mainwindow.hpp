@@ -27,6 +27,7 @@
 
 #include "drawgeometry.hpp"
 #include "drawmesh.hpp"
+#include "drawsim.hpp"
 #include "ConsoleOutput.hpp"
 
 class DrawGeoArea;
@@ -45,6 +46,7 @@ public:
     ConsoleOutput *PythonTerminal;
     DrawGeoArea *drawGeoArea;
     DrawMeshArea *drawMeshArea;
+    DrawSimArea *drawSimArea;
     
 
 protected:

@@ -25,6 +25,7 @@ MainWindow::MainWindow(QWidget *parent)
     PythonTerminal = new ConsoleOutput(this);
     drawGeoArea = new DrawGeoArea(PythonTerminal, geo, this);
     drawMeshArea = new DrawMeshArea(PythonTerminal, geo, mesh, this);
+    drawSimArea = new DrawSimArea(PythonTerminal, geo, mesh, this);
 
     screen = QGuiApplication::primaryScreen();
     QRect screenGeometry = screen->geometry();
@@ -34,7 +35,7 @@ MainWindow::MainWindow(QWidget *parent)
     tabWidget = new QTabWidget(this);
     tabWidget->addTab(drawGeoArea, tr("Geometry"));
     tabWidget->addTab(drawMeshArea, tr("Mesh"));
-    tabWidget->addTab(new QWidget(), tr("Simulation"));
+    tabWidget->addTab(drawSimArea, tr("Simulation"));
 
     QSettings settings;
     int height = settings.value("Split", 600).toInt();
@@ -61,12 +62,16 @@ MainWindow::MainWindow(QWidget *parent)
 void MainWindow::handleTabChange(int index)
 {
     if (tabWidget->widget(index) == drawMeshArea) {
-        // if (!drawMeshArea->hasMesh){
-        //     drawMeshArea->drawgeometry();
-        // } else {
-        //     drawMeshArea->drawgeometry();
-        //     drawMeshArea->displayMesh();
-        // }
+        if (!drawMeshArea->hasMesh){
+            drawMeshArea->drawgeometry();
+        } else {
+            drawMeshArea->drawgeometry();
+            drawMeshArea->displayMesh();
+        }
+    }
+    if (tabWidget->widget(index) == drawSimArea) {
+        drawSimArea->drawgeometry();
+        drawSimArea->displayMesh();
     }
 }
 
