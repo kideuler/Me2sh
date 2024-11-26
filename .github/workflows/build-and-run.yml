@@ -82,10 +82,10 @@ jobs:
       run: |
         eval $(/home/linuxbrew/.linuxbrew/bin/brew shellenv)
         brew install mfem
-        for dir in /home/linuxbrew/.linuxbrew/Cellar/*/; do
+        for dir in /home/linuxbrew/.linuxbrew/Cellar/*; do
           echo "$dir"
-          sudo cp -r $dir/lib/* /usr/local/lib/
-          sudo cp -r $dir/include/* /usr/local/include/
+          sudo cp -r $dir/*/lib/* /usr/local/lib/
+          sudo cp -r $dir/*/include/* /usr/local/include/
         done
 
     - name: Configure CMake (macOS only)
