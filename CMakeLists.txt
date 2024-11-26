@@ -12,6 +12,10 @@ project(
 # Define the version number as a preprocessor definition
 add_definitions(-DPROJECT_VERSION="${PROJECT_VERSION}")
 
+# add RPATH to installation
+set(CMAKE_INSTALL_RPATH "${CMAKE_INSTALL_PREFIX}/lib")
+set(CMAKE_INSTALL_RPATH_USE_LINK_PATH TRUE)
+
   # set build type
 if(NOT CMAKE_BUILD_TYPE)
 set(CMAKE_BUILD_TYPE Release)
@@ -146,3 +150,18 @@ target_link_libraries(me2sh PRIVATE
     ${SUITESPARSE_LIBRARIES}
     ${MFEM_LIBRARIES}
 )
+
+
+include(GNUInstallDirs)
+
+
+# Installation rules
+install(TARGETS me2sh geometry meshing
+    RUNTIME DESTINATION bin
+    LIBRARY DESTINATION lib
+    ARCHIVE DESTINATION lib
+    BUNDLE DESTINATION bin
+    PUBLIC_HEADER DESTINATION include
+)
+
+install(DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}/resources DESTINATION share/me2sh)
