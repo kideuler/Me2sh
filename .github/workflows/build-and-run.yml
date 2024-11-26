@@ -102,9 +102,12 @@ jobs:
       run: |
 
         eval "$(/home/linuxbrew/.linuxbrew/bin/brew shellenv)"
-        export CMAKE_PREFIX_PATH=$(brew --prefix mfem):$(brew --prefix suite-sparse)
-        export CMAKE_LIBRARY_PATH=$(brew --prefix mfem)/lib:$(brew --prefix suite-sparse)/lib
-        export CMAKE_INCLUDE_PATH=$(brew --prefix mfem)/include:$(brew --prefix suite-sparse)/include
+        export HOMEBREW_DIRS=$(brew --prefix $(brew list))# Add all directories in HOMEBREW_DIRS to CMAKE_PREFIX_PATH
+        for dir in $HOMEBREW_DIRS; do
+          export CMAKE_PREFIX_PATH=$CMAKE_PREFIX_PATH:$dir
+          export CMAKE_LIBRARY_PATH=$CMAKE_LIBRARY_PATH:$dir/lib
+          export CMAKE_INCLUDE_PATH=$CMAKE_INCLUDE_PATH:$dir/include
+        done
 
         cmake -B ${{ steps.strings.outputs.build-output-dir }} -DCMAKE_CXX_COMPILER=${{ matrix.cpp_compiler }} -DCMAKE_C_COMPILER=${{ matrix.c_compiler }} -DCMAKE_BUILD_TYPE=${{ matrix.build_type }} -DCMAKE_PREFIX_PATH=$CMAKE_PREFIX_PATH -DCMAKE_LIBRARY_PATH=$CMAKE_LIBRARY_PATH -DCMAKE_INCLUDE_PATH=$CMAKE_INCLUDE_PATH -S ${{ github.workspace }}
 
