@@ -106,7 +106,7 @@ jobs:
         -DCMAKE_CXX_COMPILER=${{ matrix.cpp_compiler }}
         -DCMAKE_C_COMPILER=${{ matrix.c_compiler }}
         -DCMAKE_BUILD_TYPE=${{ matrix.build_type }}
-        -DCMAKE_PREFIX_PATH=/home/linuxbrew/.linuxbrew/Cellar/mfem/*/:/home/linuxbrew/.linuxbrew/Cellar/suite-sparse/*/
+        -DCMAKE_PREFIX_PATH=/home/linuxbrew/.linuxbrew/Cellar/mfem/*/;/home/linuxbrew/.linuxbrew/Cellar/suite-sparse/*/
         -S ${{ github.workspace }}
 
     - name: Build
