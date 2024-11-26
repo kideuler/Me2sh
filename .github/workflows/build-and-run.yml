@@ -83,9 +83,13 @@ jobs:
         eval $(/home/linuxbrew/.linuxbrew/bin/brew shellenv)
         brew install mfem
 
+        export PATH=\$PATH:/home/linuxbrew/.linuxbrew/Cellar
+        echo "export PATH=\$PATH:/home/linuxbrew/.linuxbrew/Cellar" >> $GITHUB_ENV
+
         # Find and add all lib and include directories to PATH
         for dir in $(find /home/linuxbrew/.linuxbrew/Cellar/ -type d \( -name "lib" -o -name "include" \)); do
           echo "Adding $dir to PATH"
+          export PATH=\$PATH:$dir
           echo "export PATH=\$PATH:$dir" >> $GITHUB_ENV
         done
 
