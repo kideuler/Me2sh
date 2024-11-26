@@ -106,8 +106,6 @@ jobs:
         export CMAKE_INCLUDE_PATH=$(brew --prefix mfem)/include:$(brew --prefix suite-sparse)/include
 
         cmake -B ${{ steps.strings.outputs.build-output-dir }}
-        -DCMAKE_CXX_COMPILER=${{ matrix.cpp_compiler }}
-        -DCMAKE_C_COMPILER=${{ matrix.c_compiler }}
         -DCMAKE_BUILD_TYPE=${{ matrix.build_type }}
         -DCMAKE_PREFIX_PATH=$CMAKE_PREFIX_PATH
         -DCMAKE_LIBRARY_PATH=$CMAKE_LIBRARY_PATH
