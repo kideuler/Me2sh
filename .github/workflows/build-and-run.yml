@@ -84,8 +84,8 @@ jobs:
         brew install mfem
         sudo cp -r /home/linuxbrew/.linuxbrew/Cellar/mfem/*/lib/* /usr/local/lib/
         sudo cp -r /home/linuxbrew/.linuxbrew/Cellar/mfem/*/include/* /usr/local/include/
-        sudo cp -r /home/linuxbrew/.linuxbrew/Cellar/suite-sparse/*/lib /usr/local/lib/
-        sudo cp -r /home/linuxbrew/.linuxbrew/Cellar/suite-sparse/*/include /usr/local/include/
+        sudo cp -r /home/linuxbrew/.linuxbrew/Cellar/suite-sparse/*/lib/* /usr/local/lib/
+        sudo cp -r /home/linuxbrew/.linuxbrew/Cellar/suite-sparse/*/include/* /usr/local/include/
 
     - name: Configure CMake (macOS only)
       if: matrix.os == 'macos-latest'
