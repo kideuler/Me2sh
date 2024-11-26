@@ -82,7 +82,7 @@ jobs:
       run: |
         eval $(/home/linuxbrew/.linuxbrew/bin/brew shellenv)
         brew install mfem
-        sudo mv -r /home/linuxbrew/.linuxbrew/Cellar/* /usr/local/
+        sudo cp -r /home/linuxbrew/.linuxbrew/Cellar/* /usr/local/
 
     - name: Configure CMake (macOS only)
       if: matrix.os == 'macos-latest'
