@@ -2,8 +2,7 @@ name: Create DMG
 
 on:
   push:
-    tags:
-      - '*'
+    branches: [ "main" ]
 
 jobs:
   build:

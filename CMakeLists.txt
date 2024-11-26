@@ -12,9 +12,10 @@ project(
 # Define the version number as a preprocessor definition
 add_definitions(-DPROJECT_VERSION="${PROJECT_VERSION}")
 
-# add RPATH to installation
-set(CMAKE_INSTALL_RPATH "${CMAKE_INSTALL_PREFIX}/lib")
+# Add RPATH to installation
+set(CMAKE_INSTALL_RPATH "@executable_path/../lib")
 set(CMAKE_INSTALL_RPATH_USE_LINK_PATH TRUE)
+# set(CMAKE_BUILD_WITH_INSTALL_RPATH TRUE)
 
   # set build type
 if(NOT CMAKE_BUILD_TYPE)
