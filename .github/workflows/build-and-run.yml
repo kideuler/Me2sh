@@ -85,6 +85,11 @@ jobs:
         eval "$(/home/linuxbrew/.linuxbrew/bin/brew shellenv)"
         brew install mfem
 
+        eval "$(/home/linuxbrew/.linuxbrew/bin/brew shellenv)"
+        export CMAKE_PREFIX_PATH=$(brew --prefix mfem):$(brew --prefix suite-sparse)
+        export CMAKE_LIBRARY_PATH=$(brew --prefix mfem)/lib:$(brew --prefix suite-sparse)/lib
+        export CMAKE_INCLUDE_PATH=$(brew --prefix mfem)/include:$(brew --prefix suite-sparse)/include
+
     - name: Configure CMake (macOS only)
       if: matrix.os == 'macos-latest'
       # Configure your program with the given configuration.
@@ -99,13 +104,11 @@ jobs:
       if: matrix.os == 'ubuntu-latest'
       # Configure your program with the given configuration.
       
-      run: |
-        eval "$(/home/linuxbrew/.linuxbrew/bin/brew shellenv)"
-        export CMAKE_PREFIX_PATH=$(brew --prefix mfem):$(brew --prefix suite-sparses)
-        export CMAKE_LIBRARY_PATH=$(brew --prefix mfem)/lib:$(brew --prefix suite-sparse)/lib
-        export CMAKE_INCLUDE_PATH=$(brew --prefix mfem)/include:$(brew --prefix suite-sparse)/include
+      run: >
 
         cmake -B ${{ steps.strings.outputs.build-output-dir }}
+        -DCMAKE_CXX_COMPILER=${{ matrix.cpp_compiler }}
+        -DCMAKE_C_COMPILER=${{ matrix.c_compiler }}
         -DCMAKE_BUILD_TYPE=${{ matrix.build_type }}
         -DCMAKE_PREFIX_PATH=$CMAKE_PREFIX_PATH
         -DCMAKE_LIBRARY_PATH=$CMAKE_LIBRARY_PATH
