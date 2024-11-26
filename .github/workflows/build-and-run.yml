@@ -73,16 +73,16 @@ jobs:
       run: |
         sudo apt-get install -y build-essential curl file git
         sh -c "$(curl -fsSL https://raw.githubusercontent.com/Linuxbrew/install/master/install.sh)"
-        echo 'eval $(/home/linuxbrew/.linuxbrew/bin/brew shellenv)' >>~/.profile
-        echo 'PATH=/home/linuxbrew/.linuxbrew/bin:$PATH' >> $GITHUB_ENV
-        eval $(/home/linuxbrew/.linuxbrew/bin/brew shellenv)
+        echo >> /home/runner/.bashrc
+        echo 'eval "$(/home/linuxbrew/.linuxbrew/bin/brew shellenv)"' >> /home/runner/.bashrc
+        eval "$(/home/linuxbrew/.linuxbrew/bin/brew shellenv)"
+        sudo apt-get install build-essential
         brew install gcc
 
     - name: Install MFEM with Homebrew (Ubuntu only)
       if: matrix.os == 'ubuntu-latest'
       run: |
-        echo 'PATH=/home/linuxbrew/.linuxbrew/bin:$PATH' >> $GITHUB_ENV
-        eval $(/home/linuxbrew/.linuxbrew/bin/brew shellenv)
+        eval "$(/home/linuxbrew/.linuxbrew/bin/brew shellenv)"
         brew install mfem
 
         # Find and add all lib and include directories to PATH
@@ -106,15 +106,7 @@ jobs:
       # Configure your program with the given configuration.
       
       run: |
-        echo 'PATH=/home/linuxbrew/.linuxbrew/bin:$PATH' >> $GITHUB_ENV
-        eval $(/home/linuxbrew/.linuxbrew/bin/brew shellenv)
-        echo "export PATH=\$PATH:/home/linuxbrew/.linuxbrew/Cellar" >> $GITHUB_ENV
-
-        # Find and add all lib and include directories to PATH
-        for dir in $(find /home/linuxbrew/.linuxbrew/Cellar/ -type d \( -name "lib" -o -name "include" \)); do
-          echo "Adding $dir to PATH"
-          echo "export PATH=\$PATH:$dir" >> $GITHUB_ENV
-        done
+        eval "$(/home/linuxbrew/.linuxbrew/bin/brew shellenv)"
 
         cmake -B ${{ steps.strings.outputs.build-output-dir }}
         -DCMAKE_CXX_COMPILER=${{ matrix.cpp_compiler }}
