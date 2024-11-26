@@ -57,6 +57,10 @@ jobs:
         brew install googletest
         brew install mfem
 
+        eval "$(/home/linuxbrew/.linuxbrew/bin/brew shellenv)"
+        mkdir $(brew --prefix open-mpi)/5.0.3
+        sudo cp -r $(brew --prefix open-mpi)/5.0.6/* $(brew --prefix open-mpi)/5.0.3
+
     - name: Install dependencies with apt-get (Ubuntu only)
       if: matrix.os == 'ubuntu-latest'
       run: |
@@ -102,12 +106,8 @@ jobs:
       run: |
 
         eval "$(/home/linuxbrew/.linuxbrew/bin/brew shellenv)"
-        export HOMEBREW_DIRS=$(brew --prefix $(brew list))# Add all directories in HOMEBREW_DIRS to CMAKE_PREFIX_PATH
-        for dir in $HOMEBREW_DIRS; do
-          export CMAKE_PREFIX_PATH=$CMAKE_PREFIX_PATH:$dir
-          export CMAKE_LIBRARY_PATH=$CMAKE_LIBRARY_PATH:$dir/lib
-          export CMAKE_INCLUDE_PATH=$CMAKE_INCLUDE_PATH:$dir/include
-        done
+        mkdir $(brew --prefix open-mpi)/5.0.3
+        sudo cp -r $(brew --prefix open-mpi)/5.0.6/* $(brew --prefix open-mpi)/5.0.3
 
         cmake -B ${{ steps.strings.outputs.build-output-dir }} -DCMAKE_CXX_COMPILER=${{ matrix.cpp_compiler }} -DCMAKE_C_COMPILER=${{ matrix.c_compiler }} -DCMAKE_BUILD_TYPE=${{ matrix.build_type }} -DCMAKE_PREFIX_PATH=$(brew --prefix mfem)/lib/cmake/mfem -S ${{ github.workspace }}
 
