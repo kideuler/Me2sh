@@ -44,7 +44,7 @@ jobs:
         hdiutil create -volname Me2sh -srcfolder install -ov -format UDZO "dmg/Me2sh.dmg"
 
     - name: Upload DMG
-      uses: actions/upload-artifact@v3
+      uses: actions/upload-artifact@v4
       with:
         name: Me2sh-dmg
         path: dmg/Me2sh.dmg
