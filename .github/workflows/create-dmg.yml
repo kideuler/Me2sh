@@ -1,0 +1,50 @@
+name: Create DMG
+
+on:
+  push:
+    branches: [ "main" ]
+
+jobs:
+  build:
+    runs-on: macos-latest
+
+    steps:
+    - uses: actions/checkout@v4
+
+    - name: Set up Homebrew
+      run: |
+        /bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh)"
+        echo 'eval "$(/opt/homebrew/bin/brew shellenv)"' >> $HOME/.zprofile
+        eval "$(/opt/homebrew/bin/brew shellenv)"
+
+    - name: Install dependencies with Homebrew
+      run: |
+        brew update
+        brew install cmake
+        brew install qt@6
+        brew install gmsh
+        brew install googletest
+        brew install mfem
+
+        mkdir $(brew --prefix)/Cellar/open-mpi/5.0.3
+        sudo cp -r $(brew --prefix)/Cellar/open-mpi/5.0.6/* $(brew --prefix)/Cellar/open-mpi/5.0.3
+
+    - name: Configure CMake
+      run: cmake -B build -DCMAKE_BUILD_TYPE=Release -S .
+
+    - name: Build
+      run: cmake --build build --config Release
+
+    - name: Install
+      run: cmake --install build --prefix install
+
+    - name: Create DMG
+      run: |
+        mkdir dmg
+        hdiutil create -volname Me2sh -srcfolder install -ov -format UDZO "dmg/Me2sh.dmg"
+
+    - name: Upload DMG
+      uses: actions/upload-artifact@v3
+      with:
+        name: Me2sh-dmg
+        path: dmg/Me2sh.dmg
