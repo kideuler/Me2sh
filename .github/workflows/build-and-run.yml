@@ -85,12 +85,6 @@ jobs:
         eval "$(/home/linuxbrew/.linuxbrew/bin/brew shellenv)"
         brew install mfem
 
-        # Find and add all lib and include directories to PATH
-        for dir in $(find /home/linuxbrew/.linuxbrew/Cellar/ -type d \( -name "lib" -o -name "include" \)); do
-          echo "Adding $dir to PATH"
-          echo "export PATH=\$PATH:$dir" >> $GITHUB_ENV
-        done
-
     - name: Configure CMake (macOS only)
       if: matrix.os == 'macos-latest'
       # Configure your program with the given configuration.
@@ -112,7 +106,7 @@ jobs:
         -DCMAKE_CXX_COMPILER=${{ matrix.cpp_compiler }}
         -DCMAKE_C_COMPILER=${{ matrix.c_compiler }}
         -DCMAKE_BUILD_TYPE=${{ matrix.build_type }}
-        -DCMAKE_PREFIX_PATH=/home/linuxbrew/.linuxbrew/Cellar/mfem/*/lib/cmake/mfem
+        -DCMAKE_FIND_ROOT_PATH=/home/linuxbrew/.linuxbrew/Cellar
         -S ${{ github.workspace }}
 
     - name: Build
