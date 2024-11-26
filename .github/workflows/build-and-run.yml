@@ -74,12 +74,14 @@ jobs:
         sudo apt-get install -y build-essential curl file git
         sh -c "$(curl -fsSL https://raw.githubusercontent.com/Linuxbrew/install/master/install.sh)"
         echo 'eval $(/home/linuxbrew/.linuxbrew/bin/brew shellenv)' >>~/.profile
+        echo 'PATH=/home/linuxbrew/.linuxbrew/bin:$PATH' >> $GITHUB_ENV
         eval $(/home/linuxbrew/.linuxbrew/bin/brew shellenv)
         brew install gcc
 
     - name: Install MFEM with Homebrew (Ubuntu only)
       if: matrix.os == 'ubuntu-latest'
       run: |
+        echo 'PATH=/home/linuxbrew/.linuxbrew/bin:$PATH' >> $GITHUB_ENV
         eval $(/home/linuxbrew/.linuxbrew/bin/brew shellenv)
         brew install mfem
 
@@ -104,6 +106,7 @@ jobs:
       # Configure your program with the given configuration.
       
       run: |
+        echo 'PATH=/home/linuxbrew/.linuxbrew/bin:$PATH' >> $GITHUB_ENV
         eval $(/home/linuxbrew/.linuxbrew/bin/brew shellenv)
         echo "export PATH=\$PATH:/home/linuxbrew/.linuxbrew/Cellar" >> $GITHUB_ENV
 
