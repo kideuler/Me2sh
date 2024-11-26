@@ -58,29 +58,13 @@ include_directories(${GMSH_INC})
 
 
 # find mfem
-find_library(MFEM_LIBRARIES mfem)
-if(NOT MFEM_LIBRARIES)
-  message(FATAL_ERROR "Could not find libmfem")
+if (MFEM_DIR)
+   find_package(mfem REQUIRED NAMES MFEM HINTS "${MFEM_DIR}"
+                "${MFEM_DIR}/lib/cmake/mfem" NO_DEFAULT_PATH)
+else()
+   find_package(mfem REQUIRED NAMES MFEM)
 endif()
-find_path(MFEM_INCLUDE_DIRS mfem.hpp)
-if(NOT MFEM_INCLUDE_DIRS)
-  message(FATAL_ERROR "Could not find mfem.hpp")
-endif()
-message(STATUS "found mfem at MFEM_INCLUDE_DIRS: ${MFEM_INCLUDE_DIRS}, MFEM_LIBRARIES: ${MFEM_LIBRARIES}")
-# find_library(mfem REQUIRED NAMES MFEM)
 include_directories(${MFEM_INCLUDE_DIRS})
-
-# find suitesparse
-find_library(SUITESPARSE_LIBRARIES umfpack)
-if(NOT SUITESPARSE_LIBRARIES)
-  message(FATAL_ERROR "Could not find libsuitesparse")
-endif()
-find_path(SUITESPARSE_INCLUDE_DIRS suitesparse/umfpack.h)
-if(NOT SUITESPARSE_INCLUDE_DIRS)
-  message(FATAL_ERROR "Could not find umfpack.h")
-endif()
-message(STATUS "found suitesparse at SUITESPARSE_INCLUDE_DIRS: ${SUITESPARSE_INCLUDE_DIRS}, SUITESPARSE_LIBRARIES: ${SUITESPARSE_LIBRARIES}")
-include_directories(${SUITESPARSE_INCLUDE_DIRS}/suitesparse)
 
 # geometry library
 file( GLOB GEOMETRY_SRCS ${CMAKE_CURRENT_SOURCE_DIR}/geom/*.cpp ${CMAKE_CURRENT_SOURCE_DIR}/geom/*.hpp )
@@ -138,6 +122,7 @@ target_include_directories(me2sh PUBLIC
     ${CMAKE_CURRENT_SOURCE_DIR}/gui/sim
     ${CMAKE_CURRENT_SOURCE_DIR}/gui/etc
     ${Python3_INCLUDE_DIRS}
+    ${MFEM_INCLUDE_DIRS}
 )
 
 target_link_libraries(me2sh PRIVATE
@@ -147,7 +132,6 @@ target_link_libraries(me2sh PRIVATE
     geometry
     meshing
     ${Python3_LIBRARIES}
-    ${SUITESPARSE_LIBRARIES}
     ${MFEM_LIBRARIES}
 )
 

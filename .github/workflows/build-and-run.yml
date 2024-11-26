@@ -109,7 +109,7 @@ jobs:
           export CMAKE_INCLUDE_PATH=$CMAKE_INCLUDE_PATH:$dir/include
         done
 
-        cmake -B ${{ steps.strings.outputs.build-output-dir }} -DCMAKE_CXX_COMPILER=${{ matrix.cpp_compiler }} -DCMAKE_C_COMPILER=${{ matrix.c_compiler }} -DCMAKE_BUILD_TYPE=${{ matrix.build_type }} -DCMAKE_PREFIX_PATH=$CMAKE_PREFIX_PATH -DCMAKE_LIBRARY_PATH=$CMAKE_LIBRARY_PATH -DCMAKE_INCLUDE_PATH=$CMAKE_INCLUDE_PATH -S ${{ github.workspace }}
+        cmake -B ${{ steps.strings.outputs.build-output-dir }} -DCMAKE_CXX_COMPILER=${{ matrix.cpp_compiler }} -DCMAKE_C_COMPILER=${{ matrix.c_compiler }} -DCMAKE_BUILD_TYPE=${{ matrix.build_type }} -DCMAKE_PREFIX_PATH=$(brew --prefix mfem)/lib/cmake/mfem -S ${{ github.workspace }}
 
     - name: Build
       run: cmake --build ${{ steps.strings.outputs.build-output-dir }} --config ${{ matrix.build_type }}
