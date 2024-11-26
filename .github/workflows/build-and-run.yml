@@ -83,8 +83,11 @@ jobs:
         eval $(/home/linuxbrew/.linuxbrew/bin/brew shellenv)
         brew install mfem
 
-        sudo find /home/linuxbrew/.linuxbrew/Cellar/ -name "lib" -type d -exec cp -r {}/. /usr/local/lib/ \;
-        sudo find /home/linuxbrew/.linuxbrew/Cellar/ -name "include" -type d -exec cp -r {}/. /usr/local/include/ \;
+        # Find and add all lib and include directories to PATH
+        for dir in $(find /home/linuxbrew/.linuxbrew/Cellar/ -type d \( -name "lib" -o -name "include" \)); do
+          echo "Adding $dir to PATH"
+          echo "export PATH=\$PATH:$dir" >> $GITHUB_ENV
+        done
 
     - name: Configure CMake (macOS only)
       if: matrix.os == 'macos-latest'
