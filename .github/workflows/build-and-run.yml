@@ -83,13 +83,9 @@ jobs:
         eval $(/home/linuxbrew/.linuxbrew/bin/brew shellenv)
         brew install mfem
 
-        export PATH=\$PATH:/home/linuxbrew/.linuxbrew/Cellar
-        echo "export PATH=\$PATH:/home/linuxbrew/.linuxbrew/Cellar" >> $GITHUB_ENV
-
         # Find and add all lib and include directories to PATH
         for dir in $(find /home/linuxbrew/.linuxbrew/Cellar/ -type d \( -name "lib" -o -name "include" \)); do
           echo "Adding $dir to PATH"
-          export PATH=\$PATH:$dir
           echo "export PATH=\$PATH:$dir" >> $GITHUB_ENV
         done
 
@@ -97,17 +93,6 @@ jobs:
       if: matrix.os == 'macos-latest'
       # Configure your program with the given configuration.
       run: >
-        eval $(/home/linuxbrew/.linuxbrew/bin/brew shellenv)
-        export PATH=\$PATH:/home/linuxbrew/.linuxbrew/Cellar
-        echo "export PATH=\$PATH:/home/linuxbrew/.linuxbrew/Cellar" >> $GITHUB_ENV
-
-        # Find and add all lib and include directories to PATH
-        for dir in $(find /home/linuxbrew/.linuxbrew/Cellar/ -type d \( -name "lib" -o -name "include" \)); do
-          echo "Adding $dir to PATH"
-          export PATH=\$PATH:$dir
-          echo "export PATH=\$PATH:$dir" >> $GITHUB_ENV
-        done
-        
         cmake -B ${{ steps.strings.outputs.build-output-dir }}
         -DCMAKE_CXX_COMPILER=${{ matrix.cpp_compiler }}
         -DCMAKE_C_COMPILER=${{ matrix.c_compiler }}
@@ -117,7 +102,17 @@ jobs:
     - name: Configure CMake (Ubuntu only)
       if: matrix.os == 'ubuntu-latest'
       # Configure your program with the given configuration.
-      run: >
+      
+      run: |
+        eval $(/home/linuxbrew/.linuxbrew/bin/brew shellenv)
+        echo "export PATH=\$PATH:/home/linuxbrew/.linuxbrew/Cellar" >> $GITHUB_ENV
+
+        # Find and add all lib and include directories to PATH
+        for dir in $(find /home/linuxbrew/.linuxbrew/Cellar/ -type d \( -name "lib" -o -name "include" \)); do
+          echo "Adding $dir to PATH"
+          echo "export PATH=\$PATH:$dir" >> $GITHUB_ENV
+        done
+
         cmake -B ${{ steps.strings.outputs.build-output-dir }}
         -DCMAKE_CXX_COMPILER=${{ matrix.cpp_compiler }}
         -DCMAKE_C_COMPILER=${{ matrix.c_compiler }}
