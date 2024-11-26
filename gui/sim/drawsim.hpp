@@ -25,18 +25,19 @@
 #include "geometry.hpp"
 #include "meshing.hpp"
 
-#include "mfem.hpp"
+#include "simulation.hpp"
 
 class DrawSimArea : public QWidget
 {
     Q_OBJECT
 public:
-    DrawSimArea(ConsoleOutput *PyTerm, std::shared_ptr<Me2sh_Geometry> geometry, std::shared_ptr<Me2sh_Mesh> mesh, QWidget *parent = nullptr);
+    DrawSimArea(ConsoleOutput *PyTerm, std::shared_ptr<Me2sh_Geometry> geometry, std::shared_ptr<Me2sh_Mesh> Mesh, std::shared_ptr<Me2sh_Simulation> simulation, QWidget *parent = nullptr);
     void clearImage();
     void setTimeSim(bool value, int num_steps, double dt);
 
     std::shared_ptr<Me2sh_Geometry> geo;
     std::shared_ptr<Me2sh_Mesh> mesh;
+    std::shared_ptr<Me2sh_Simulation> sim;
     ConsoleOutput *PythonTerminal;
 
     mfem::Mesh *mfem_mesh;

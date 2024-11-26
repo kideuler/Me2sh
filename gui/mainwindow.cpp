@@ -22,10 +22,11 @@ MainWindow::MainWindow(QWidget *parent)
 { 
     geo = std::make_shared<Me2sh_Geometry>();
     mesh = std::make_shared<Me2sh_Mesh>();
+    sim = std::make_shared<Me2sh_Simulation>();
     PythonTerminal = new ConsoleOutput(this);
     drawGeoArea = new DrawGeoArea(PythonTerminal, geo, this);
     drawMeshArea = new DrawMeshArea(PythonTerminal, geo, mesh, this);
-    drawSimArea = new DrawSimArea(PythonTerminal, geo, mesh, this);
+    drawSimArea = new DrawSimArea(PythonTerminal, geo, mesh, sim, this);
 
     screen = QGuiApplication::primaryScreen();
     QRect screenGeometry = screen->geometry();
@@ -65,12 +66,10 @@ void MainWindow::handleTabChange(int index)
         if (!drawMeshArea->hasMesh){
             drawMeshArea->drawgeometry();
         } else {
-            drawMeshArea->drawgeometry();
             drawMeshArea->displayMesh();
         }
     }
     if (tabWidget->widget(index) == drawSimArea) {
-        drawSimArea->drawgeometry();
         drawSimArea->displayMesh();
     }
 }
@@ -251,6 +250,7 @@ void MainWindow::about()
 void MainWindow::clearScreen(){
     drawGeoArea->clearImage();
     drawMeshArea->clearImage();
+    drawSimArea->clearImage();
     PythonTerminal->clear();
 }
 

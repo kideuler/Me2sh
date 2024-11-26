@@ -25,6 +25,8 @@ class Me2sh_Geometry {
             points.clear();
             plot_points.clear();
             segments.clear();
+            curveTags.clear();
+            planeTags.clear();
             gmsh::clear();
             firstPointIndex = 0;
         }

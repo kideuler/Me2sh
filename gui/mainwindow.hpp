@@ -79,6 +79,7 @@ private:
 
     std::shared_ptr<Me2sh_Geometry> geo;
     std::shared_ptr<Me2sh_Mesh> mesh;
+    std::shared_ptr<Me2sh_Simulation> sim;
 
     QStackedWidget *sidebarStack;
     QWidget *geometrySidebar;

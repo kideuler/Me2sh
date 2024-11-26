@@ -1,7 +1,7 @@
 #include "drawsim.hpp"
 
-DrawSimArea::DrawSimArea(ConsoleOutput *PyTerm, std::shared_ptr<Me2sh_Geometry> geometry, std::shared_ptr<Me2sh_Mesh> mesh, QWidget *parent)
-    : QWidget(parent), PythonTerminal(PyTerm), geo(geometry), mesh(mesh)
+DrawSimArea::DrawSimArea(ConsoleOutput *PyTerm, std::shared_ptr<Me2sh_Geometry> geometry, std::shared_ptr<Me2sh_Mesh> Mesh, std::shared_ptr<Me2sh_Simulation> simulation, QWidget *parent)
+    : QWidget(parent), PythonTerminal(PyTerm), geo(geometry), mesh(Mesh), sim(simulation)
 {
     setAttribute(Qt::WA_StaticContents);
     setMouseTracking(true);

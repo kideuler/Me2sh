@@ -79,6 +79,12 @@ add_library(meshing SHARED ${MESHING_SRCS})
 target_include_directories(meshing PUBLIC ${CMAKE_CURRENT_SOURCE_DIR}/mesh)
 target_link_libraries(meshing PUBLIC geometry)
 
+# simulation library
+file( GLOB SIM_SRCS ${CMAKE_CURRENT_SOURCE_DIR}/sim/*.cpp ${CMAKE_CURRENT_SOURCE_DIR}/sim/*.hpp )
+add_library(simulation SHARED ${SIM_SRCS})
+target_include_directories(simulation PUBLIC ${CMAKE_CURRENT_SOURCE_DIR}/sim)
+target_link_libraries(simulation PUBLIC geometry meshing)
+
 # adding tests
 add_subdirectory(test)
 
@@ -117,6 +123,7 @@ set_target_properties(me2sh PROPERTIES
 target_include_directories(me2sh PUBLIC
     ${CMAKE_CURRENT_SOURCE_DIR}/geom
     ${CMAKE_CURRENT_SOURCE_DIR}/mesh
+    ${CMAKE_CURRENT_SOURCE_DIR}/sim
     ${CMAKE_CURRENT_SOURCE_DIR}/gui
     ${CMAKE_CURRENT_SOURCE_DIR}/gui/geom
     ${CMAKE_CURRENT_SOURCE_DIR}/gui/mesh
@@ -132,6 +139,7 @@ target_link_libraries(me2sh PRIVATE
     Qt6::Widgets
     geometry
     meshing
+    simulation
     ${Python3_LIBRARIES}
     ${MFEM_LIBRARIES}
 )
