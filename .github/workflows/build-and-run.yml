@@ -82,12 +82,9 @@ jobs:
       run: |
         eval $(/home/linuxbrew/.linuxbrew/bin/brew shellenv)
         brew install mfem
-        
-        sudo find /home/linuxbrew/.linuxbrew/Cellar/ -name "*.dylib" -exec cp {} /usr/local/lib/ \;
-        sudo find /home/linuxbrew/.linuxbrew/Cellar/ -name "*.so" -exec cp {} /usr/local/lib/ \;
-        sudo find /home/linuxbrew/.linuxbrew/Cellar/ -name "*.a" -exec cp {} /usr/local/lib/ \;
-        sudo find /home/linuxbrew/.linuxbrew/Cellar/ -name "*.h" -exec cp {} /usr/local/include/ \;
-        sudo find /home/linuxbrew/.linuxbrew/Cellar/ -name "*.hpp" -exec cp {} /usr/local/include/ \;
+
+        sudo find /home/linuxbrew/.linuxbrew/Cellar/ -name "lib" -type d -exec cp -r {}/. /usr/local/lib/ \;
+        sudo find /home/linuxbrew/.linuxbrew/Cellar/ -name "include" -type d -exec cp -r {}/. /usr/local/include/ \;
 
     - name: Configure CMake (macOS only)
       if: matrix.os == 'macos-latest'
